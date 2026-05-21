@@ -740,6 +740,11 @@ export default function App() {
           {/* Opening times & social icon actions */}
           <div className="flex flex-col md:items-end justify-between gap-6">
             <div className="text-left md:text-right">
+              <div className="mb-4">
+                <span className="font-sans text-xs font-bold text-[#e2e2e2] uppercase tracking-widest block mb-2">Localização Paddock</span>
+                <p className="font-sans text-[11px] text-brand-text-muted">Av. Pres. Kennedy - Jóquei club</p>
+                <p className="font-sans text-[11px] text-brand-text-muted">Campos dos Goytacazes - RJ, 28020-010</p>
+              </div>
               <span className="font-sans text-xs font-bold text-[#e2e2e2] uppercase tracking-widest block mb-2">Funcionamento</span>
               <p className="font-sans text-[11px] text-brand-text-muted">Terça a Quinta: 16:00 - 22:00</p>
               <p className="font-sans text-[11px] text-brand-text-muted">Sexta e Sábado: 14:00 - 00:00</p>

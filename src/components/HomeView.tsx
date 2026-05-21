@@ -12,7 +12,8 @@ import {
   Sparkles,
   Camera,
   Maximize2,
-  X
+  X,
+  MapPin
 } from 'lucide-react';
 import { ActiveTab, RankingDriver } from '../types';
 
@@ -30,7 +31,7 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
   
   // Mock live states
   const [trackStatus, setTrackStatus] = useState<'ABERTA' | 'CHAFADA' | 'MANUTENÇÃO'>('ABERTA');
-  const [temperature, setTemperature] = useState(24);
+  const [temperature, setTemperature] = useState<number | null>(null);
   const [countDown, setCountDown] = useState({ minutes: 12, seconds: 45 });
   
   // Lightbox state for the gallery
@@ -84,15 +85,22 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
     return () => clearInterval(timer);
   }, []);
 
-  // Soft fluctuate temperature
+  // Real-time temperature fetch using Open-Meteo for Campos dos Goytacazes
   useEffect(() => {
-    const tempTimer = setInterval(() => {
-      setTemperature(prev => {
-        const delta = Math.random() > 0.5 ? 1 : -1;
-        const nextTemp = prev + delta;
-        return nextTemp >= 20 && nextTemp <= 28 ? nextTemp : prev;
-      });
-    }, 15000);
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-21.7535&longitude=-41.3235&current=temperature_2m');
+        const data = await res.json();
+        if (data && data.current && typeof data.current.temperature_2m === 'number') {
+          setTemperature(Math.round(data.current.temperature_2m));
+        }
+      } catch (error) {
+        console.error("Erro ao buscar a temperatura em tempo real:", error);
+      }
+    };
+
+    fetchWeather();
+    const tempTimer = setInterval(fetchWeather, 300000); // 5 min interval update
     return () => clearInterval(tempTimer);
   }, []);
 
@@ -138,21 +146,33 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
         <div className="relative z-10 px-6 md:px-10 max-w-[1200px] mx-auto w-full pt-20 pb-16">
           <div className="max-w-3xl">
             {/* Real-time Track indicators */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className="skew-tag bg-green-600 px-4 py-1.5 flex items-center gap-2 rounded-r-sm shadow-md">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-green-400"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                </span>
-                <span className="font-sans text-xs font-semibold uppercase tracking-wider text-white">
-                  STATUS DA PISTA: {trackStatus}
-                </span>
+            <div className="flex flex-col gap-3 mb-6">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="skew-tag bg-green-600 px-4 py-1.5 flex items-center gap-2 rounded-r-sm shadow-md">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-green-400"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </span>
+                  <span className="font-sans text-xs font-semibold uppercase tracking-wider text-white">
+                    STATUS DA PISTA: {trackStatus}
+                  </span>
+                </div>
+                
+                <div className="skew-tag border border-brand-border bg-black/60 backdrop-blur-sm px-4 py-1.5 rounded-l-sm flex items-center gap-2">
+                  <span className="font-sans text-xs font-semibold uppercase tracking-wider text-[#e2e2e2]">
+                    PISTA SECA • {temperature !== null ? `${temperature}°C` : '...'}
+                  </span>
+                </div>
               </div>
               
-              <div className="skew-tag border border-brand-border bg-black/60 backdrop-blur-sm px-4 py-1.5 rounded-l-sm">
-                <span className="font-sans text-xs font-semibold uppercase tracking-wider text-[#e2e2e2]">
-                  PISTA SECA • {temperature}°C
-                </span>
+              {/* Location Badge */}
+              <div className="flex items-center">
+                <div className="skew-tag border border-brand-border bg-black/60 backdrop-blur-sm px-4 py-2 rounded-sm max-w-fit shadow-md">
+                  <span className="font-sans text-[11px] font-semibold text-[#e2e2e2] tracking-wider uppercase flex items-center gap-2">
+                    <span className="text-brand-red font-black text-xs not-italic whitespace-nowrap">📍</span> 
+                    Av. Pres. Kennedy - Jóquei club, Campos dos Goytacazes - RJ, 28020-010
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -203,7 +223,7 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           
           {/* Quick Booking Widget */}
-          <div className="md:col-span-8 bg-brand-surface border border-brand-border p-8 md:p-10 flex flex-col justify-between relative overflow-hidden rounded-xl backdrop-blur-md shadow-2xl">
+          <div className="md:col-span-7 bg-brand-surface border border-brand-border p-8 md:p-10 flex flex-col justify-between relative overflow-hidden rounded-xl backdrop-blur-md shadow-2xl">
             <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
               <Timer className="w-36 h-36" />
             </div>
@@ -313,43 +333,86 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
           </div>
 
           {/* Live Status Sidebar */}
-          <div className="md:col-span-4 flex flex-col gap-6">
+          <div className="md:col-span-5 flex flex-col gap-6">
             
-            {/* Live record */}
-            <div className="bg-black/40 border border-brand-border p-6 rounded-lg flex flex-col justify-center items-center text-center relative overflow-hidden backdrop-blur-sm">
-              <div className="absolute top-2 left-2 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
-                <span className="text-[9px] font-sans tracking-widest text-red-500 font-bold uppercase">LIVE</span>
+            {/* Map Location Card */}
+            <div className="bg-[#121214] border border-brand-border rounded-xl overflow-hidden flex flex-col shadow-2xl backdrop-blur-md">
+              <div className="relative h-[250px] w-full overflow-hidden bg-[#18181b] flex items-center justify-center">
+                {/* Simulated Map Background */}
+                <div className="absolute inset-0 opacity-40">
+                  <svg className="w-full h-full" viewBox="0 0 400 250" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M-50,120 L150,50 L250,150 L450,80 M100,250 L200,100 L300,300 M250,0 L150,100 L0,20" stroke="rgba(227,6,19,0.3)" strokeWidth="2" fill="none" />
+                    <path d="M-50,220 L150,150 L250,250 L450,180" stroke="rgba(227,6,19,0.15)" strokeWidth="1" fill="none" />
+                  </svg>
+                </div>
+                <div className="absolute inset-0 carbon-texture opacity-50"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#121214]"></div>
+                
+                {/* Map Pin */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] flex flex-col items-center">
+                  <div className="relative flex items-center justify-center mb-2">
+                    <div className="absolute w-12 h-12 rounded-full bg-brand-red/30 animate-ping"></div>
+                    <div className="w-10 h-10 rounded-full bg-transparent border-4 border-white flex items-center justify-center shadow-[0_4px_15px_rgba(227,6,19,0.6)] z-10" style={{background: 'radial-gradient(circle, #e30613 40%, transparent 45%)'}}></div>
+                    {/* Pin tail */}
+                    <div className="absolute -bottom-3 w-0 h-0 border-l-8 border-r-8 border-t-[12px] border-l-transparent border-r-transparent border-t-white z-0"></div>
+                  </div>
+                </div>
+                
+                <span className="absolute bottom-6 font-sans text-sm font-semibold text-white drop-shadow-lg text-center px-4">
+                  Av. Pres. Kennedy - Jóquei club,<br/>Campos de Goyatcazes - RJ
+                </span>
               </div>
-              <span className="font-sans text-xs font-bold text-brand-red tracking-widest mb-2 uppercase">
-                RECORDE DA VOLTA HOJE
-              </span>
-              <div className="font-display text-5xl text-[#e2e2e2] tracking-wider my-1">
-                42:194
+
+              <div className="p-8 flex flex-col items-center text-center">
+                <span className="font-sans text-[11px] font-black tracking-widest uppercase text-brand-red mb-3">
+                  LOCALIZAÇÃO DO EVENTO
+                </span>
+                <p className="font-sans text-sm font-semibold text-[#e2e2e2] mb-6 leading-relaxed">
+                  Av. Pres. Kennedy - Jóquei club,<br/>Campos dos Goytacazes - RJ,<br/>28020-010
+                </p>
+                <a 
+                  href="https://maps.google.com/?q=Av.+Pres.+Kennedy+-+Jóquei+club,+Campos+dos+Goytacazes+-+RJ,+28020-010" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-brand-red hover:bg-[#ff1e27] text-white font-sans text-xs font-black px-8 py-3.5 rounded tracking-widest uppercase flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-[0_4px_15px_rgba(227,6,19,0.3)] cursor-pointer"
+                >
+                  VER ROTA
+                  <MapPin className="w-4 h-4" />
+                </a>
               </div>
-              <span className="font-sans text-xs font-semibold text-brand-text-muted mt-2 tracking-widest uppercase">
-                PILOTO: MARCO_V8
-              </span>
             </div>
 
-            {/* Next Grid Start Countdown */}
-            <div className="carbon-texture border border-brand-border p-6 flex flex-col items-center justify-center min-h-[200px] rounded-lg">
-              <div className="flex gap-1.5 mb-4">
-                <div className="w-8 h-2 bg-brand-red rounded-sm"></div>
-                <div className="w-8 h-2 bg-brand-red rounded-sm"></div>
-                <div className="w-8 h-2 bg-brand-red rounded-sm"></div>
-                <div className="w-8 h-2 bg-white/10 rounded-sm animate-pulse"></div>
-                <div className="w-8 h-2 bg-white/10 rounded-sm"></div>
+            {/* Smaller existing widgets placed below the map */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Live record */}
+              <div className="bg-black/40 border border-brand-border p-4 rounded-xl flex flex-col justify-center items-center text-center relative overflow-hidden backdrop-blur-sm">
+                <div className="absolute top-2 left-2 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+                  <span className="text-[8px] font-sans tracking-widest text-red-500 font-bold uppercase">LIVE</span>
+                </div>
+                <span className="font-sans text-[9px] font-bold text-brand-red tracking-widest mb-1 uppercase mt-3">
+                  RECORDE HOJE
+                </span>
+                <div className="font-display text-3xl text-[#e2e2e2] tracking-wider my-0.5">
+                  42:194
+                </div>
+                <span className="font-sans text-[9px] font-semibold text-brand-text-muted mt-1 tracking-widest uppercase">
+                  MARCO_V8
+                </span>
               </div>
-              <span className="font-display text-2xl italic tracking-wide text-[#e2e2e2] uppercase">
-                PRÓXIMA LARGADA
-              </span>
-              <span className="font-sans text-brand-red text-3xl font-extrabold tracking-wider mt-1 drop-shadow">
-                {String(countDown.minutes).padStart(2, '0')}:{String(countDown.seconds).padStart(2, '0')} MIN
-              </span>
-              <span className="font-sans text-[10px] text-brand-text-muted uppercase mt-2 select-none tracking-widest">
-                Paddock Grid 3 • 125cc
-              </span>
+
+              {/* Next Grid Start Countdown */}
+              <div className="carbon-texture border border-brand-border p-4 flex flex-col items-center justify-center rounded-xl">
+                <span className="font-display text-base italic tracking-wide text-[#e2e2e2] uppercase">
+                  LARGADA
+                </span>
+                <span className="font-sans text-brand-red text-2xl font-extrabold tracking-wider mt-0.5 drop-shadow">
+                  {String(countDown.minutes).padStart(2, '0')}:{String(countDown.seconds).padStart(2, '0')}
+                </span>
+                <span className="font-sans text-[8px] text-brand-text-muted uppercase mt-1 select-none tracking-widest">
+                  Grid 3 • 125cc
+                </span>
+              </div>
             </div>
 
           </div>
