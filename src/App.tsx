@@ -67,7 +67,7 @@ export default function App() {
       avatar: '',
       phone: '(22) 99999-9999',
       whatsapp: '(22) 99999-9999',
-      password: 'admin',
+      password: 'playkart2026',
       isRegistered: true,
       role: 'admin'
     };
