@@ -15,6 +15,11 @@ export interface PilotProfile {
   weight?: number;
   password?: string;
   isRegistered?: boolean;
+  role?: 'admin' | 'pilot';
+  bloodType?: string;
+  documentType?: 'CPF' | 'RG' | 'Passaporte' | 'Outro';
+  documentNumber?: string;
+  whatsapp?: string;
 }
 
 export interface TimeSlot {
@@ -52,4 +57,4 @@ export interface RankingDriver {
   tagline: string;
 }
 
-export type ActiveTab = 'home' | 'calendar' | 'ranking' | 'profile';
+export type ActiveTab = 'home' | 'calendar' | 'ranking' | 'profile' | 'admin';

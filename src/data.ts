@@ -79,91 +79,22 @@ export const INITIAL_TIME_SLOTS: TimeSlot[] = [
   }
 ];
 
-export const INITIAL_RANKINGS: RankingDriver[] = [
-  {
-    rank: 1,
-    name: 'Alex Apex',
-    nickname: 'ALEX_APEX',
-    bestLap: '42:194',
-    recordBeaten: true,
-    avatar: p1Avatar,
-    tagline: 'QUEBRA DE RECORDE - LÍDER ABSOLUTO'
-  },
-  {
-    rank: 2,
-    name: 'Sarah Shift',
-    nickname: 'SARAH_SHIFT',
-    bestLap: '43:012',
-    avatar: p2Avatar,
-    tagline: 'MELHOR VOLTA SHIFT-CONTROL'
-  },
-  {
-    rank: 3,
-    name: 'Drft King',
-    nickname: 'DRFT_KING',
-    bestLap: '43:288',
-    avatar: p3Avatar,
-    tagline: 'DERRAPAGENS DE CONTROLE MILIMÉTRICO'
-  },
-  {
-    rank: 4,
-    name: 'Marco V8',
-    nickname: 'MARCO_V8',
-    bestLap: '43:890',
-    avatar: 'https://picsum.photos/seed/marco/200/200',
-    tagline: 'Mestre da tração constante'
-  },
-  {
-    rank: 5,
-    name: 'Velo Rossi',
-    nickname: 'VELO_ROSSI',
-    bestLap: '44:112',
-    avatar: 'https://picsum.photos/seed/rossi/200/200',
-    tagline: 'Curvas agressivas e frenagem tardia'
-  },
-  {
-    rank: 6,
-    name: 'Bruno Boxer',
-    nickname: 'BOXER_BRUNO',
-    bestLap: '44:420',
-    avatar: 'https://picsum.photos/seed/bruno/200/200',
-    tagline: 'Ritmo consistente em qualquer setor'
-  },
-  {
-    rank: 7,
-    name: 'Luna Light',
-    nickname: 'LUNA_SPEED',
-    bestLap: '44:980',
-    avatar: 'https://picsum.photos/seed/luna/200/200',
-    tagline: 'Velocidade final estonteante'
-  }
-];
+export const INITIAL_RANKINGS: RankingDriver[] = [];
 
 export const INITIAL_PILOT_PROFILE: PilotProfile = {
-  name: 'Erisson Ribeiro de Souza Junior',
-  nickname: 'EDU_KART',
-  email: 'esribeirojunior@gmail.com',
-  category: 'Sênior (125cc)',
-  activeStreak: 3,
-  totalRaces: 14,
-  bestLap: '44:652',
-  avatar: p1Avatar,
-  experienceLevel: 'Intermediário'
+  name: '',
+  nickname: '',
+  email: '',
+  category: '',
+  activeStreak: 0,
+  totalRaces: 0,
+  bestLap: '',
+  avatar: '',
+  experienceLevel: 'Iniciante',
+  isRegistered: false
 };
 
-export const INITIAL_BOOKINGS: Booking[] = [
-  {
-    id: 'booking-mock-1',
-    slotId: 'slot-1',
-    date: 'Hoje, 24 Out',
-    time: '16:00',
-    karts: 2,
-    category: 'Sênior (125cc)',
-    price: 170.00,
-    pilotName: 'Erisson Ribeiro de Souza Junior',
-    status: 'Confirmada'
-  }
-];
+export const INITIAL_BOOKINGS: Booking[] = [];
 
 // Helper functions for LocalStorage persistence
 export const loadFromLocalStorage = <T>(key: string, defaultValue: T): T => {

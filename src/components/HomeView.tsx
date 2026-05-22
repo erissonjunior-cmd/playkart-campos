@@ -38,7 +38,7 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
   const [activeLightbox, setActiveLightbox] = useState<string | null>(null);
   
   // Quick book inputs
-  const [pilotName, setPilotName] = useState('Erisson Ribeiro de Souza Junior');
+  const [pilotName, setPilotName] = useState('');
   const [selectedDate, setSelectedDate] = useState('Quarta, 20 Mai 2026');
   const [pilotsCount, setPilotsCount] = useState<number>(2);
   const [selectedCategory, setSelectedCategory] = useState('Sênior (125cc)');
@@ -253,7 +253,7 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
                       type="text"
                       value={pilotName}
                       onChange={(e) => setPilotName(e.target.value)}
-                      placeholder="Ex: Erisson Ribeiro de Souza Junior"
+                      placeholder="Ex: Seu Nome Completo"
                       className="bg-brand-surface-high text-brand-text p-4 border border-brand-border/60 hover:border-brand-red focus:border-brand-red focus:outline-none transition-all rounded-lg font-sans text-sm font-semibold tracking-wide placeholder-brand-text-muted/40"
                     />
                   </div>
@@ -394,10 +394,10 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
                   RECORDE HOJE
                 </span>
                 <div className="font-display text-3xl text-[#e2e2e2] tracking-wider my-0.5">
-                  42:194
+                  --:---
                 </div>
                 <span className="font-sans text-[9px] font-semibold text-brand-text-muted mt-1 tracking-widest uppercase">
-                  MARCO_V8
+                  A DEFINIR
                 </span>
               </div>
 
@@ -586,8 +586,8 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
                   CONCENTRAÇÃO PRÉ-GRID
                 </h3>
                 <div className="flex justify-between items-center border-t border-brand-border/50 pt-2 mt-2">
-                  <span className="font-sans text-xs font-semibold text-brand-text-muted">CATEGORIA / PILOTO</span>
-                  <span className="font-sans text-sm font-bold text-brand-text">SÊNIOR / EDU_KART</span>
+                  <span className="font-sans text-xs font-semibold text-brand-text-muted">CATEGORIA</span>
+                  <span className="font-sans text-sm font-bold text-brand-text">A DEFINIR</span>
                 </div>
               </div>
             </div>
@@ -617,7 +617,7 @@ export default function HomeView({ onNavigate, onQuickBook, rankings }: HomeView
                   <span className="bg-brand-red text-white text-[10px] px-2 py-0.5 font-sans font-extrabold tracking-widest inline-block mb-1 skew-tag">
                     <span>COPA VERÃO</span>
                   </span>
-                  <p className="text-xs text-brand-text-muted font-sans font-medium">EDUARDO JUNIOR E SEU FILHO NO TOPO DO PÓDIO</p>
+                  <p className="text-xs text-brand-text-muted font-sans font-medium">PILOTOS NO TOPO DO PÓDIO</p>
                 </div>
               </div>
               <div className="text-center">

@@ -30,6 +30,10 @@ export default function AuthView({
   const [regEmail, setRegEmail] = useState<string>('');
   const [regPhone, setRegPhone] = useState<string>('');
   const [regPassword, setRegPassword] = useState<string>('');
+  const [regDob, setRegDob] = useState<string>('');
+  const [regBloodType, setRegBloodType] = useState<string>('');
+  const [regDocType, setRegDocType] = useState<'CPF' | 'RG' | 'Passaporte' | 'Outro'>('CPF');
+  const [regDocNum, setRegDocNum] = useState<string>('');
   
   // Registration Feedback
   const [regError, setRegError] = useState<string | null>(null);
@@ -78,7 +82,7 @@ export default function AuthView({
     e.preventDefault();
     setRegError(null);
 
-    if (!regName || !regEmail || !regPhone || !regPassword) {
+    if (!regName || !regEmail || !regPhone || !regPassword || !regDob || !regDocNum) {
       setRegError('Preencha todos os campos obrigatórios.');
       return;
     }
@@ -113,12 +117,17 @@ export default function AuthView({
       bestLap: '47:890',
       avatar: `https://picsum.photos/seed/pilot-${randomSeed}/200/200`,
       phone: regPhone,
+      whatsapp: regPhone,
+      documentType: regDocType,
+      documentNumber: regDocNum,
+      bloodType: regBloodType || undefined,
       cpf: '',
       rg: '',
-      dob: '1998-05-20',
+      dob: regDob,
       weight: 75,
       password: regPassword,
-      isRegistered: true
+      isRegistered: true,
+      role: 'pilot'
     };
 
     onRegisterPilot(newPilot);
@@ -133,6 +142,9 @@ export default function AuthView({
       setRegEmail('');
       setRegPhone('');
       setRegPassword('');
+      setRegDob('');
+      setRegBloodType('');
+      setRegDocNum('');
     }, 1500);
   };
 
@@ -294,13 +306,72 @@ export default function AuthView({
                 />
               </div>
 
+              {/* New Profile details Grid */}
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="flex flex-col gap-1">
+                  <label className="font-sans text-[10px] font-black text-brand-text-muted tracking-widest uppercase">
+                    DATA DE NASCIMENTO
+                  </label>
+                  <input
+                    type="date"
+                    value={regDob}
+                    onChange={(e) => setRegDob(e.target.value)}
+                    required
+                    className="bg-brand-surface text-brand-text p-3 border border-brand-border focus:border-brand-red focus:outline-none rounded text-xs font-semibold"
+                  />
+                </div>
+                
+                <div className="flex flex-col gap-1">
+                  <label className="font-sans text-[10px] font-black text-brand-text-muted tracking-widest uppercase">
+                    TIPO SANGUÍNEO (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={regBloodType}
+                    onChange={(e) => setRegBloodType(e.target.value)}
+                    placeholder="Ex: O+"
+                    className="bg-brand-surface text-brand-text p-3 border border-brand-border focus:border-brand-red focus:outline-none rounded text-xs font-semibold"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="font-sans text-[10px] font-black text-brand-text-muted tracking-widest uppercase">
+                    TIPO DE DOCUMENTO
+                  </label>
+                  <select
+                    value={regDocType}
+                    onChange={(e) => setRegDocType(e.target.value as any)}
+                    className="bg-brand-surface text-brand-text p-3 border border-brand-border focus:border-brand-red focus:outline-none rounded text-xs font-semibold"
+                  >
+                    <option value="CPF">CPF</option>
+                    <option value="RG">RG</option>
+                    <option value="Passaporte">Passaporte</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+                
+                <div className="flex flex-col gap-1">
+                  <label className="font-sans text-[10px] font-black text-brand-text-muted tracking-widest uppercase">
+                    Nº DOCUMENTO
+                  </label>
+                  <input
+                    type="text"
+                    value={regDocNum}
+                    onChange={(e) => setRegDocNum(e.target.value)}
+                    placeholder="Seu documento"
+                    required
+                    className="bg-brand-surface text-brand-text p-3 border border-brand-border focus:border-brand-red focus:outline-none rounded text-xs font-semibold"
+                  />
+                </div>
+              </div>
+
               {/* Phone and Password Grid */}
               <div className="grid grid-cols-2 gap-3.5">
                 
                 {/* Phone Component */}
                 <div className="flex flex-col gap-1">
                   <label className="font-sans text-[10px] font-black text-brand-text-muted tracking-widest uppercase">
-                    CELULAR
+                    WHATSAPP (CELULAR)
                   </label>
                   <input
                     type="text"

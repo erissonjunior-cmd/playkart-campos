@@ -30,6 +30,7 @@ import CalendarView from './components/CalendarView';
 import RankingView from './components/RankingView';
 import ProfileView from './components/ProfileView';
 import AuthView from './components/AuthView';
+import AdminView from './components/AdminView';
 
 export default function App() {
   
@@ -57,32 +58,20 @@ export default function App() {
     if (!loaded || loaded.length === 0) {
       return [
         {
-          ...INITIAL_PILOT_PROFILE,
-          password: 'playkart2026',
-          phone: '(22) 99888-7766',
-          cpf: '123.456.789-00',
-          rg: '12.345.678-9',
-          dob: '1998-05-20',
-          weight: 78,
-          isRegistered: true
-        },
-        {
-          name: 'Sarah Shift Driver',
-          nickname: 'SARAH_SHIFT',
-          email: 'sarah.shift@playkart.com',
-          category: 'Super F4 (21hp)',
-          experienceLevel: 'Avançado',
-          activeStreak: 5,
-          totalRaces: 22,
-          bestLap: '43:012',
-          avatar: 'https://files.catbox.moe/l5ofx0.jpg',
-          phone: '(21) 98765-4321',
-          cpf: '987.654.321-11',
-          rg: '98.765.432-1',
-          dob: '1995-10-12',
-          weight: 62,
-          password: 'playkart2026',
-          isRegistered: true
+          name: 'Administrador do Sistema',
+          nickname: 'ADMIN',
+          email: 'admin@playkart.com',
+          category: 'Staff',
+          experienceLevel: 'Profissional',
+          activeStreak: 0,
+          totalRaces: 0,
+          bestLap: '',
+          avatar: '',
+          phone: '(22) 99999-9999',
+          whatsapp: '(22) 99999-9999',
+          password: 'admin',
+          isRegistered: true,
+          role: 'admin'
         }
       ];
     }
@@ -249,6 +238,12 @@ export default function App() {
     }));
   };
 
+  // Admin Update slot callback
+  const handleUpdateSlot = (updatedSlot: TimeSlot) => {
+    setSlots(current => current.map(s => s.id === updatedSlot.id ? updatedSlot : s));
+    alert('Sessão atualizada com sucesso!');
+  };
+
   // Profile metadata update callback
   const handleUpdateProfile = (updated: PilotProfile) => {
     setProfile(updated);
@@ -349,6 +344,18 @@ export default function App() {
             >
               Portal do Piloto
             </button>
+            {isLoggedIn && profile.role === 'admin' && (
+              <button 
+                onClick={() => handleNavigate('admin')}
+                className={`font-sans text-xs font-bold tracking-widest uppercase pb-1 border-b-2 cursor-pointer transition-colors ${
+                  activeTab === 'admin' 
+                    ? 'text-brand-red border-brand-red' 
+                    : 'text-[#e2e2e2] border-transparent hover:text-brand-red'
+                }`}
+              >
+                Painel Admin
+              </button>
+            )}
           </div>
 
           {/* Primary Call Action elements */}
@@ -470,34 +477,7 @@ export default function App() {
                       </button>
                     </form>
 
-                    <div className="mt-4 pt-3 border-t border-[#1a1a1f]">
-                      <span className="text-[10px] font-bold text-brand-text-muted tracking-wider uppercase block mb-2">
-                        PILOTOS OFICIAIS (1-CLIQUE)
-                      </span>
-                      <div className="space-y-2">
-                        {registeredPilots.map((pilot) => (
-                          <div
-                            key={pilot.email}
-                            onClick={() => handleNavQuickLogin(pilot)}
-                            className="flex items-center gap-2.5 p-2 rounded border border-brand-border/40 hover:border-brand-red/60 bg-black/35 hover:bg-white/5 cursor-pointer transition-all"
-                            title={`Entrar instantaneamente como ${pilot.nickname}`}
-                          >
-                            <img
-                              src={pilot.avatar}
-                              alt={pilot.name}
-                              referrerPolicy="no-referrer"
-                              className="w-7 h-7 rounded-full border border-brand-red object-cover"
-                            />
-                            <div className="flex-grow min-w-0">
-                              <div className="flex justify-between items-center">
-                                <span className="font-display text-xs text-white tracking-wide truncate">{pilot.nickname}</span>
-                                <span className="text-[9px] font-mono text-brand-red font-bold uppercase">{pilot.experienceLevel}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+
 
                     <div className="mt-4 text-center">
                       <button
@@ -569,6 +549,17 @@ export default function App() {
                 Portal do Piloto
               </button>
 
+              {isLoggedIn && profile.role === 'admin' && (
+                <button 
+                  onClick={() => handleNavigate('admin')}
+                  className={`text-left font-sans text-xs font-bold tracking-widest uppercase py-2 cursor-pointer ${
+                    activeTab === 'admin' ? 'text-brand-red' : 'text-[#e2e2e2]'
+                  }`}
+                >
+                  Painel Admin
+                </button>
+              )}
+
               {/* Compact Mobile Login inside menu when not logged in */}
               {!isLoggedIn && (
                 <div className="border border-brand-border bg-[#121214] rounded-lg p-4 space-y-3 my-2 text-left">
@@ -595,12 +586,7 @@ export default function App() {
                           setNavEmail('');
                           alert(`Bem-vindo, ${found.nickname}! Cockpit liberado.`);
                         } else {
-                          const demo = registeredPilots[0];
-                          setProfile(demo);
-                          setIsLoggedIn(true);
-                          setMobileMenuOpen(false);
-                          setNavEmail('');
-                          alert(`Bem-vindo, ${demo.nickname}! Cockpit liberado.`);
+                          alert('Credenciais inválidas ou nenhum piloto encontrado.');
                         }
                       }}
                       className="bg-brand-red text-white font-sans text-[10px] font-black px-3.5 py-2 uppercase rounded tracking-widest cursor-pointer"
@@ -608,25 +594,7 @@ export default function App() {
                       LOGIN
                     </button>
                   </div>
-                  <div className="flex flex-col gap-1 text-[10px] text-brand-text-muted">
-                    <span className="font-semibold block mb-1">Acesso instantâneo em 1-clique:</span>
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                      {registeredPilots.map(p => (
-                        <button
-                          key={p.email}
-                          onClick={() => {
-                            setProfile(p);
-                            setIsLoggedIn(true);
-                            setMobileMenuOpen(false);
-                            alert(`Acesso Rápido: Bem-vindo, ${p.nickname}!`);
-                          }}
-                          className="px-2.5 py-1 shrink-0 bg-black/40 border border-brand-border/80 text-[10px] font-bold text-white rounded hover:border-brand-red cursor-pointer"
-                        >
-                          {p.nickname}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+
                 </div>
               )}
 
@@ -696,6 +664,24 @@ export default function App() {
                     onRegisterPilot={handleRegisterPilot}
                     defaultEmail={profile.email !== 'convidado@playkart.com' ? profile.email : ''}
                   />
+                )}
+              </div>
+            )}
+
+            {activeTab === 'admin' && (
+              <div className="py-12 px-6 md:px-10 max-w-[1200px] mx-auto">
+                {isLoggedIn && profile.role === 'admin' ? (
+                  <AdminView 
+                    bookings={bookings}
+                    slots={slots}
+                    registeredPilots={registeredPilots}
+                    onCancelBooking={handleCancelBooking}
+                    onUpdateSlot={handleUpdateSlot}
+                  />
+                ) : (
+                  <div className="text-center py-20 text-brand-red font-display text-2xl uppercase">
+                    Acesso Restrito
+                  </div>
                 )}
               </div>
             )}
