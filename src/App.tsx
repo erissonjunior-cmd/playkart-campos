@@ -55,27 +55,25 @@ export default function App() {
 
   const [registeredPilots, setRegisteredPilots] = useState<PilotProfile[]>(() => {
     const loaded = loadFromLocalStorage<PilotProfile[]>('pk_campos_registered_pilots', []);
-    if (!loaded || loaded.length === 0) {
-      return [
-        {
-          name: 'Administrador do Sistema',
-          nickname: 'ADMIN',
-          email: 'admin@playkart.com',
-          category: 'Staff',
-          experienceLevel: 'Profissional',
-          activeStreak: 0,
-          totalRaces: 0,
-          bestLap: '',
-          avatar: '',
-          phone: '(22) 99999-9999',
-          whatsapp: '(22) 99999-9999',
-          password: 'admin',
-          isRegistered: true,
-          role: 'admin'
-        }
-      ];
-    }
-    return loaded;
+    const adminAccount: PilotProfile = {
+      name: 'Administrador do Sistema',
+      nickname: 'ADMIN',
+      email: 'admin@playkart.com',
+      category: 'Staff',
+      experienceLevel: 'Profissional',
+      activeStreak: 0,
+      totalRaces: 0,
+      bestLap: '',
+      avatar: '',
+      phone: '(22) 99999-9999',
+      whatsapp: '(22) 99999-9999',
+      password: 'admin',
+      isRegistered: true,
+      role: 'admin'
+    };
+    // Garante que o admin SEMPRE exista, mesmo que ja haja outros pilotos
+    const hasAdmin = loaded.some(p => p.email === 'admin@playkart.com');
+    return hasAdmin ? loaded : [adminAccount, ...loaded];
   });
 
   const [slots, setSlots] = useState<TimeSlot[]>(() => 
