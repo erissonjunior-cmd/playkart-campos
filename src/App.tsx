@@ -239,7 +239,6 @@ export default function App() {
   // Admin Update slot callback
   const handleUpdateSlot = (updatedSlot: TimeSlot) => {
     setSlots(current => current.map(s => s.id === updatedSlot.id ? updatedSlot : s));
-    alert('Sessão atualizada com sucesso!');
   };
 
   // Profile metadata update callback
@@ -675,6 +674,7 @@ export default function App() {
                     registeredPilots={registeredPilots}
                     onCancelBooking={handleCancelBooking}
                     onUpdateSlot={handleUpdateSlot}
+                    onUpdatePilot={handleUpdateProfile}
                   />
                 ) : (
                   <div className="text-center py-20 text-brand-red font-display text-2xl uppercase">
