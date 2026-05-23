@@ -114,7 +114,7 @@ export default function App() {
           <div onClick={() => handleNavigate('home')} className="flex items-center gap-3 cursor-pointer group select-none">
             <span className="font-display text-4xl tracking-normal text-white flex items-center gap-2.5 group-hover:scale-105 transition-transform duration-300">
               <span className="italic">PLAY<span className="text-brand-red">KART</span></span>
-              <span className="font-sans text-[10px] font-black uppercase tracking-[0.2em] text-[#d4d4d8] bg-brand-surface-high border border-brand-border px-2 py-0.5 rounded-sm select-none not-italic">CAMPOS</span>
+              <span className="font-sans text-[10px] font-black uppercase tracking-[0.2em] text-[#d4d4d8] bg-brand-surface-high border border-brand-red px-2 py-0.5 rounded-sm select-none not-italic transition-colors">CAMPOS RACING</span>
             </span>
           </div>
 
