@@ -131,6 +131,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToLocalStorage('pk_campos_bookings', bookings); }, [bookings]);
   useEffect(() => { saveToLocalStorage('pk_campos_rankings', rankings); }, [rankings]);
 
+  // Ensure master admin is always sync'd in local storage list if missing
+  useEffect(() => {
+    const masterEmail = 'esribeirojunior@gmail.com';
+    if (!registeredPilots.some(p => p.email.toLowerCase() === masterEmail.toLowerCase())) {
+       // Re-trigger the logic if somehow it was lost
+       setRegisteredPilots(prev => {
+         if (prev.some(p => p.email.toLowerCase() === masterEmail.toLowerCase())) return prev;
+         return [
+           {
+             name: 'Erisson Ribeiro de Souza Junior',
+             nickname: 'ERISSON_MASTER',
+             email: masterEmail,
+             category: 'Staff',
+             experienceLevel: 'Profissional',
+             activeStreak: 52,
+             totalRaces: 100,
+             bestLap: '42:194',
+             avatar: 'https://picsum.photos/seed/eduardo/200/200',
+             phone: '(22) 99999-9999',
+             whatsapp: '(22) 99999-9999',
+             password: 'playkart2026',
+             isRegistered: true,
+             role: 'admin'
+           },
+           ...prev
+         ];
+       });
+    }
+  }, [registeredPilots]);
+
   // Actions
   const handleNavigate = (tab: ActiveTab) => {
     setActiveTab(tab);
