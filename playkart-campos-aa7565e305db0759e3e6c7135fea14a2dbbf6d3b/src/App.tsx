@@ -16,6 +16,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useApp } from './context/AppContext';
+import { PilotProfile } from './types';
 
 import HomeView from './components/HomeView';
 import CalendarView from './components/CalendarView';
@@ -51,8 +52,27 @@ export default function App() {
 
     // SUPER FAILSAFE: Hardcoded check for testing
     if ((trimmedInput === 'admin' || trimmedInput === 'admin@admin.com') && navPassword === 'admin') {
-      const adminMaster = registeredPilots.find(p => p.email === 'admin@admin.com' || p.email === 'admin') || registeredPilots[0];
-      handleLoginSuccess({ ...adminMaster, role: 'admin' });
+      const existingAdmin = registeredPilots.find(p => p.email === 'admin@admin.com' || p.email === 'admin');
+      const adminToLogin = existingAdmin || {
+        name: 'Admin Geral',
+        nickname: 'ADMIN',
+        email: 'admin@admin.com',
+        role: 'admin',
+        avatar: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+        category: 'Pro (250cc)',
+        experienceLevel: 'Pro',
+        activeStreak: 0,
+        totalRaces: 0,
+        bestLap: '00:000',
+        phone: '',
+        whatsapp: '',
+        documentType: 'CPF',
+        documentNumber: '',
+        dob: '1990-01-01',
+        isRegistered: true
+      };
+      
+      handleLoginSuccess(adminToLogin as PilotProfile);
       setShowNavDropdown(false);
       setNavEmail('');
       setNavPassword('');
