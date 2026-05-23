@@ -9,7 +9,9 @@ import {
   Share2,
   X,
   LogIn,
-  Menu
+  Menu,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -32,9 +34,10 @@ export default function App() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navEmail, setNavEmail] = useState('');
-  const [navPassword, setNavPassword] = useState('playkart2026');
+  const [navPassword, setNavPassword] = useState('');
   const [navError, setNavError] = useState<string | null>(null);
   const [showNavDropdown, setShowNavDropdown] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleNavLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +55,7 @@ export default function App() {
       handleLoginSuccess({ ...adminMaster, role: 'admin' });
       setShowNavDropdown(false);
       setNavEmail('');
-      setNavPassword('playkart2026');
+      setNavPassword('');
       alert(`Bem-vindo MASTER ADMIN! Cockpit liberado.`);
       return;
     }
@@ -60,11 +63,12 @@ export default function App() {
     const found = registeredPilots.find(
       p => p.email.toLowerCase() === trimmedInput && (p.password || 'playkart2026') === navPassword
     );
+
     if (found) {
       handleLoginSuccess(found);
       setShowNavDropdown(false);
       setNavEmail('');
-      setNavPassword('playkart2026');
+      setNavPassword('');
       alert(`Bem-vindo de volta, ${found.nickname}! Cockpit liberado.`);
     } else {
       setNavError('Credenciais inválidas');
@@ -152,13 +156,28 @@ export default function App() {
                     <form onSubmit={handleNavLogin} className="space-y-3.5">
                       <div className="flex flex-col gap-1">
                         <label className="text-[10px] font-extrabold text-brand-text-muted uppercase">SEU E-MAIL</label>
-                        <input type="email" value={navEmail} onChange={(e) => setNavEmail(e.target.value)} className="bg-brand-surface text-brand-text p-2.5 border border-brand-border rounded text-xs" />
+                        <input type="email" value={navEmail} onChange={(e) => setNavEmail(e.target.value)} className="bg-brand-surface text-brand-text p-2.5 border border-brand-border rounded text-xs w-full focus:outline-none focus:border-brand-red transition-colors" placeholder="email@exemplo.com" />
                       </div>
                       <div className="flex flex-col gap-1">
                         <label className="text-[10px] font-extrabold text-brand-text-muted uppercase">SENHA SECRETA</label>
-                        <input type="password" value={navPassword} onChange={(e) => setNavPassword(e.target.value)} className="bg-brand-surface text-brand-text p-2.5 border border-brand-border rounded text-xs" />
+                        <div className="relative">
+                          <input 
+                            type={showPassword ? "text" : "password"} 
+                            value={navPassword} 
+                            onChange={(e) => setNavPassword(e.target.value)} 
+                            className="bg-brand-surface text-brand-text p-2.5 border border-brand-border rounded text-xs w-full pr-10 focus:outline-none focus:border-brand-red transition-colors" 
+                            placeholder="Sua senha"
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-text-muted hover:text-white transition-colors"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
                       </div>
-                      <button type="submit" className="w-full bg-brand-red text-white font-display text-xs py-2.5 rounded uppercase font-black">ENTRAR NO COCKPIT</button>
+                      <button type="submit" className="w-full bg-brand-red hover:bg-[#ff1e27] text-white font-display text-xs py-3 rounded uppercase font-black tracking-widest transition-all">ENTRAR NO COCKPIT</button>
                     </form>
                   </motion.div>
                 )}
@@ -179,7 +198,7 @@ export default function App() {
                   {tab === 'home' ? 'Início' : tab === 'calendar' ? 'Reservas' : tab === 'ranking' ? 'Rankings' : 'Portal do Piloto'}
                 </button>
               ))}
-              <button onClick={() => navigateAndClose('calendar')} className="bg-brand-red text-white font-display text-lg py-3 rounded text-center">RESERVE SUA BATERIA AGORA</button>
+              <button onClick={() => navigateAndClose('calendar')} className="bg-brand-red text-white font-display text-lg py-3 rounded text-center uppercase tracking-widest">RESERVE SUA BATERIA AGORA</button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -196,38 +215,21 @@ export default function App() {
             )}
             {activeTab === 'ranking' && (
               <div className="py-12 px-6 md:px-10 max-w-[1200px] mx-auto">
-                <RankingView rankings={rankings} />
+                <RankingView />
               </div>
             )}
             {activeTab === 'profile' && (
               <div className="py-12 px-6 md:px-10 max-w-[1200px] mx-auto">
                 {isLoggedIn ? (
-                  <ProfileView 
-                    profile={profile} 
-                    bookings={bookings} 
-                    onUpdateProfile={handleUpdateProfile} 
-                    onCancelBooking={handleCancelBooking} 
-                    onLogout={handleLogout} 
-                  />
+                  <ProfileView />
                 ) : (
-                  <AuthView 
-                    onLoginSuccess={handleLoginSuccess} 
-                    registeredPilots={registeredPilots} 
-                    onRegisterPilot={handleRegisterPilot} 
-                  />
+                  <AuthView />
                 )}
               </div>
             )}
             {activeTab === 'admin' && isLoggedIn && profile.role === 'admin' && (
               <div className="py-12 px-6 md:px-10 max-w-[1200px] mx-auto">
-                <AdminView 
-                  bookings={bookings} 
-                  slots={slots} 
-                  registeredPilots={registeredPilots} 
-                  onCancelBooking={handleCancelBooking} 
-                  onUpdateSlot={handleUpdateSlot} 
-                  onUpdatePilot={handleUpdateProfile} 
-                />
+                <AdminView />
               </div>
             )}
           </motion.div>
@@ -242,27 +244,27 @@ export default function App() {
           </div>
           <div className="grid grid-cols-2 gap-8">
             <div className="flex flex-col gap-3">
-              <span className="font-bold text-white uppercase">Navegação</span>
-              <button onClick={() => handleNavigate('home')} className="text-left hover:text-brand-red">Início</button>
-              <button onClick={() => handleNavigate('calendar')} className="text-left hover:text-brand-red">Agendar</button>
-              <button onClick={() => handleNavigate('ranking')} className="text-left hover:text-brand-red">Rankings</button>
+              <span className="font-bold text-white uppercase tracking-widest text-[10px]">Navegação</span>
+              <button onClick={() => handleNavigate('home')} className="text-left hover:text-brand-red transition-colors">Início</button>
+              <button onClick={() => handleNavigate('calendar')} className="text-left hover:text-brand-red transition-colors">Agendar</button>
+              <button onClick={() => handleNavigate('ranking')} className="text-left hover:text-brand-red transition-colors">Rankings</button>
             </div>
             <div className="flex flex-col gap-3">
-              <span className="font-bold text-white uppercase">Jurídico</span>
-              <a href="#" className="hover:text-brand-red text-left">Termos</a>
-              <a href="#" className="hover:text-brand-red text-left">Privacidade</a>
+              <span className="font-bold text-white uppercase tracking-widest text-[10px]">Jurídico</span>
+              <a href="#" className="hover:text-brand-red text-left transition-colors font-semibold">Termos de Uso</a>
+              <a href="#" className="hover:text-brand-red text-left transition-colors font-semibold">Privacidade</a>
             </div>
           </div>
           <div className="flex flex-col md:items-end gap-4 text-left md:text-right">
             <div>
-              <span className="font-bold text-white uppercase block mb-1">Localização</span>
-              <p>Av. Pres. Kennedy - Jóquei club</p>
+              <span className="font-bold text-white uppercase block mb-1 tracking-widest text-[10px]">Localização</span>
+              <p className="font-semibold text-white">Av. Pres. Kennedy - Jóquei club</p>
               <p>Campos dos Goytacazes - RJ</p>
             </div>
             <div className="flex items-center gap-4 mt-4">
-              <Share2 className="w-5 h-5 cursor-pointer hover:text-brand-red" onClick={() => { navigator.clipboard.writeText(window.location.href); alert('Copiado!'); }} />
+              <Share2 className="w-5 h-5 cursor-pointer hover:text-brand-red transition-colors" onClick={() => { navigator.clipboard.writeText(window.location.href); alert('Link copiado!'); }} />
               <Globe className="w-5 h-5" />
-              <span>© {new Date().getFullYear()} PLAYKART CAMPOS</span>
+              <span className="font-bold tracking-widest">© {new Date().getFullYear()} PLAYKART CAMPOS</span>
             </div>
           </div>
         </div>
@@ -274,11 +276,11 @@ export default function App() {
           { id: 'home', icon: <Home className="w-5 h-5" />, label: 'Home' },
           { id: 'calendar', icon: <CalendarIcon className="w-5 h-5" />, label: 'Calendar' },
           { id: 'ranking', icon: <Trophy className="w-5 h-5" />, label: 'Ranking' },
-          { id: 'profile', icon: isLoggedIn ? <img src={profile.avatar} className="w-5 h-5 rounded-full" /> : <User className="w-5 h-5" />, label: 'Profile' }
+          { id: 'profile', icon: isLoggedIn ? <img src={profile.avatar} className="w-5 h-5 rounded-full border border-brand-red" /> : <User className="w-5 h-5" />, label: 'Profile' }
         ].map((item) => (
-          <button key={item.id} onClick={() => handleNavigate(item.id as any)} className={`flex flex-col items-center gap-1 ${activeTab === item.id ? 'text-brand-red' : 'text-brand-text-muted'}`}>
+          <button key={item.id} onClick={() => handleNavigate(item.id as any)} className={`flex flex-col items-center gap-1 transition-all ${activeTab === item.id ? 'text-brand-red scale-110' : 'text-brand-text-muted hover:text-white'}`}>
             {item.icon}
-            <span className="text-[10px] font-semibold">{item.label}</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter">{item.label}</span>
           </button>
         ))}
       </nav>
