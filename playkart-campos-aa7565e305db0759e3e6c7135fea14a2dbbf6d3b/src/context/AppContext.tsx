@@ -133,32 +133,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Ensure master admin is always sync'd in local storage list if missing
   useEffect(() => {
-    const masterEmail = 'esribeirojunior@gmail.com';
-    if (!registeredPilots.some(p => p.email.toLowerCase() === masterEmail.toLowerCase())) {
-       // Re-trigger the logic if somehow it was lost
-       setRegisteredPilots(prev => {
-         if (prev.some(p => p.email.toLowerCase() === masterEmail.toLowerCase())) return prev;
-         return [
-           {
-             name: 'Erisson Ribeiro de Souza Junior',
-             nickname: 'ERISSON_MASTER',
-             email: masterEmail,
-             category: 'Staff',
-             experienceLevel: 'Profissional',
-             activeStreak: 52,
-             totalRaces: 100,
-             bestLap: '42:194',
-             avatar: 'https://picsum.photos/seed/eduardo/200/200',
-             phone: '(22) 99999-9999',
-             whatsapp: '(22) 99999-9999',
-             password: 'playkart2026',
-             isRegistered: true,
-             role: 'admin'
-           },
-           ...prev
-         ];
-       });
-    }
+    const adminsToSync = [
+      {
+        name: 'Erisson Ribeiro de Souza Junior',
+        nickname: 'ERISSON_MASTER',
+        email: 'esribeirojunior@gmail.com',
+        category: 'Staff',
+        experienceLevel: 'Profissional',
+        activeStreak: 52,
+        totalRaces: 100,
+        bestLap: '42:194',
+        avatar: 'https://picsum.photos/seed/eduardo/200/200',
+        phone: '(22) 99999-9999',
+        whatsapp: '(22) 99999-9999',
+        password: 'playkart2026',
+        isRegistered: true,
+        role: 'admin' as const
+      },
+      {
+        name: 'Administrador Genérico',
+        nickname: 'ADMIN',
+        email: 'admin',
+        category: 'Staff',
+        experienceLevel: 'Profissional',
+        activeStreak: 0,
+        totalRaces: 0,
+        bestLap: '00:000',
+        avatar: '',
+        phone: '000',
+        whatsapp: '000',
+        password: 'admin',
+        isRegistered: true,
+        role: 'admin' as const
+      }
+    ];
+
+    setRegisteredPilots(prev => {
+      let newList = [...prev];
+      let changed = false;
+      
+      adminsToSync.forEach(admin => {
+        if (!newList.some(p => p.email.toLowerCase() === admin.email.toLowerCase())) {
+          newList.unshift(admin);
+          changed = true;
+        }
+      });
+      
+      return changed ? newList : prev;
+    });
   }, [registeredPilots]);
 
   // Actions
