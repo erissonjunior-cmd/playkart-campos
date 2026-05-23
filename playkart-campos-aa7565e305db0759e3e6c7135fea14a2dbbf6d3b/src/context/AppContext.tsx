@@ -59,24 +59,52 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [registeredPilots, setRegisteredPilots] = useState<PilotProfile[]>(() => {
     const loaded = loadFromLocalStorage<PilotProfile[]>('pk_campos_registered_pilots', []);
-    const adminAccount: PilotProfile = {
-      name: 'Administrador do Sistema',
-      nickname: 'ADMIN',
-      email: 'admin@playkart.com',
-      category: 'Staff',
-      experienceLevel: 'Profissional',
-      activeStreak: 0,
-      totalRaces: 0,
-      bestLap: '',
-      avatar: '',
-      phone: '(22) 99999-9999',
-      whatsapp: '(22) 99999-9999',
-      password: 'playkart2026',
-      isRegistered: true,
-      role: 'admin'
-    };
-    const hasAdmin = loaded.some(p => p.email === 'admin@playkart.com');
-    return hasAdmin ? loaded : [adminAccount, ...loaded];
+    
+    // Default Admin Accounts
+    const defaultAdmins: PilotProfile[] = [
+      {
+        name: 'Eduardo Ribeiro Junior',
+        nickname: 'MASTER_ADMIN',
+        email: 'esribeirojunior@gmail.com',
+        category: 'Staff',
+        experienceLevel: 'Profissional',
+        activeStreak: 52,
+        totalRaces: 100,
+        bestLap: '42:194',
+        avatar: 'https://picsum.photos/seed/eduardo/200/200',
+        phone: '(22) 99999-9999',
+        whatsapp: '(22) 99999-9999',
+        password: 'playkart2026',
+        isRegistered: true,
+        role: 'admin'
+      },
+      {
+        name: 'Sarah Shift',
+        nickname: 'SARAH_PRO',
+        email: 'sarah.shift@playkart.com',
+        category: 'Sênior (125cc)',
+        experienceLevel: 'Profissional',
+        activeStreak: 12,
+        totalRaces: 45,
+        bestLap: '42:250',
+        avatar: 'https://picsum.photos/seed/sarah/200/200',
+        phone: '(22) 88888-8888',
+        whatsapp: '(22) 88888-8888',
+        password: 'playkart2026',
+        isRegistered: true,
+        role: 'admin'
+      }
+    ];
+
+    // Merge loaded with admins, avoiding duplicates
+    let updatedList = [...loaded];
+    defaultAdmins.forEach(admin => {
+      if (!updatedList.some(p => p.email.toLowerCase() === admin.email.toLowerCase())) {
+        updatedList.unshift(admin);
+      }
+    });
+
+    return updatedList;
   });
 
   const [slots, setSlots] = useState<TimeSlot[]>(() => 
