@@ -1,6 +1,0 @@
-{
-  "name": "PlayKart Campos",
-  "description": "Plataforma de alta performance para reserva de karts, acompanhamento de recordes e portal do piloto do PlayKart Campos.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
