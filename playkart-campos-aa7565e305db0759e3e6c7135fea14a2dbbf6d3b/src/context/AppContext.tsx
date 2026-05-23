@@ -153,7 +153,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       {
         name: 'Administrador Genérico',
         nickname: 'ADMIN',
-        email: 'admin',
+        email: 'admin@admin.com',
         category: 'Staff',
         experienceLevel: 'Profissional',
         activeStreak: 0,
