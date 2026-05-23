@@ -131,7 +131,7 @@ export default function BookingWidget() {
               onClick={handleBookSubmit}
               className="mt-5 w-full bg-brand-red hover:bg-[#ff1e27] text-white font-display text-2xl py-5 hover:tracking-[0.05em] transition-all flex items-center justify-center gap-4 rounded-lg mechanical-switch cursor-pointer shadow-[0_4px_20px_rgba(227,6,19,0.3)] hover:shadow-[0_4px_30px_rgba(227,6,19,0.5)] border border-brand-red/45"
             >
-              <span>VERIFICAR DISPONIBILIDADE NA DISP_PISTA</span>
+              <span>VERIFICAR DISPONIBILIDADE NA PISTA</span>
               <ArrowRight className="w-6 h-6 stroke-[2]" />
             </button>
           </div>
