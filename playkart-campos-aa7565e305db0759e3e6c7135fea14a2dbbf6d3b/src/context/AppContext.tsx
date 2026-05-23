@@ -173,8 +173,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       let changed = false;
       
       adminsToSync.forEach(admin => {
-        if (!newList.some(p => p.email.toLowerCase() === admin.email.toLowerCase())) {
+        const existingIndex = newList.findIndex(p => p.email.toLowerCase() === admin.email.toLowerCase());
+        
+        if (existingIndex === -1) {
+          // If totally missing, add it
           newList.unshift(admin);
+          changed = true;
+        } else if (newList[existingIndex].password !== admin.password) {
+          // If exists but password changed/wrong, update it
+          newList[existingIndex] = { ...newList[existingIndex], password: admin.password, role: 'admin' };
           changed = true;
         }
       });
