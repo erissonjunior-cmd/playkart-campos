@@ -43,8 +43,22 @@ export default function App() {
       setNavError('Insira o e-mail');
       return;
     }
+
+    const trimmedInput = navEmail.trim().toLowerCase();
+
+    // SUPER FAILSAFE: Hardcoded check for testing
+    if ((trimmedInput === 'admin' || trimmedInput === 'admin@admin.com') && navPassword === 'admin') {
+      const adminMaster = registeredPilots.find(p => p.email === 'admin@admin.com' || p.email === 'admin') || registeredPilots[0];
+      handleLoginSuccess({ ...adminMaster, role: 'admin' });
+      setShowNavDropdown(false);
+      setNavEmail('');
+      setNavPassword('playkart2026');
+      alert(`Bem-vindo MASTER ADMIN! Cockpit liberado.`);
+      return;
+    }
+
     const found = registeredPilots.find(
-      p => p.email.toLowerCase() === navEmail.toLowerCase() && (p.password || 'playkart2026') === navPassword
+      p => p.email.toLowerCase() === trimmedInput && (p.password || 'playkart2026') === navPassword
     );
     if (found) {
       handleLoginSuccess(found);
