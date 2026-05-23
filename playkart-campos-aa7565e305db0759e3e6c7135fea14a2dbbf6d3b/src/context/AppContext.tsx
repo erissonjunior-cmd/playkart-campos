@@ -63,8 +63,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Default Admin Accounts
     const defaultAdmins: PilotProfile[] = [
       {
-        name: 'Eduardo Ribeiro Junior',
-        nickname: 'MASTER_ADMIN',
+        name: 'Erisson Ribeiro Junior',
+        nickname: 'ERISSON_MASTER',
         email: 'esribeirojunior@gmail.com',
         category: 'Staff',
         experienceLevel: 'Profissional',
