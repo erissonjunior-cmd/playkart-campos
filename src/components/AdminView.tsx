@@ -144,64 +144,137 @@ export default function AdminView() {
       )}
 
       {activeTab === 'circuit' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#121214] border border-brand-border rounded-lg p-6">
-              <h3 className="font-display text-xl italic text-white mb-4">EDITOR DO TRAÇADO</h3>
-              <p className="text-brand-text-muted text-[10px] mb-6 uppercase tracking-wider font-extrabold flex items-center gap-2">
-                <span className="bg-brand-red w-2 h-2 rounded-full animate-pulse"></span>
-                Clique no mapa abaixo para posicionar ou remover um ponto estratégico.
+        <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[750px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+          
+          {/* LEFT: Game-style Toolbar */}
+          <div className="w-full lg:w-72 bg-[#0b0e14] border border-brand-border rounded-xl p-5 flex flex-col gap-6 shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-brand-red opacity-50"></div>
+            
+            <div className="space-y-1">
+              <h4 className="font-display text-xs text-brand-red tracking-[0.2em] font-black uppercase italic italic-no">Sequência Técnica</h4>
+              <div className="grid grid-cols-5 gap-1.5 mt-2">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                  <div key={n} className={`aspect-square flex items-center justify-center border text-[10px] font-black rounded-sm cursor-help transition-all ${circuitCurves.length >= n ? 'bg-brand-red border-brand-red text-white' : 'border-zinc-800 text-zinc-600'}`}>{n}</div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-display text-xs text-brand-red tracking-[0.2em] font-black uppercase italic italic-no">Ações Globais</h4>
+              <button 
+                onClick={() => { if(confirm('Resetar todo o traçado?')) setCircuitCurves([]); }}
+                className="w-full bg-[#1a1a1f] hover:bg-brand-red/20 border border-brand-border hover:border-brand-red text-white py-3 rounded text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> LIMPAR TUDO
+              </button>
+            </div>
+
+            <div className="space-y-3 flex-grow">
+              <h4 className="font-display text-xs text-brand-red tracking-[0.2em] font-black uppercase italic italic-no">Ferramentas</h4>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { icon: <Edit className="w-4 h-4"/>, label: 'Lápis' },
+                  { icon: <Trash2 className="w-4 h-4"/>, label: 'Borracha' },
+                  { icon: <Plus className="w-4 h-4"/>, label: 'Adicionar' },
+                  { icon: <MapIcon className="w-4 h-4"/>, label: 'Ponto' },
+                  { icon: <Users className="w-4 h-4"/>, label: 'Agente' },
+                  { icon: <Timer className="w-4 h-4"/>, label: 'Time' },
+                  { icon: <Calendar className="w-4 h-4"/>, label: 'Data' },
+                  { icon: <Save className="w-4 h-4"/>, label: 'Salvar' }
+                ].map((tool, idx) => (
+                  <button key={idx} className="aspect-square bg-[#161b22] border border-brand-border hover:border-brand-red text-brand-text-muted hover:text-brand-red rounded flex items-center justify-center transition-all">
+                    {tool.icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3 bg-brand-red/5 border border-brand-red/20 rounded-lg">
+              <p className="text-[9px] text-brand-red font-black uppercase tracking-tighter leading-tight italic">
+                * MODO ESTRATÉGIA ATIVO: Selecione os setores de frenagem e aceleração ideal.
               </p>
-              
-              <div 
-                className="relative aspect-square w-full max-w-[500px] mx-auto border border-brand-red/20 rounded-xl overflow-hidden cursor-crosshair group shadow-2xl skew-tag"
+            </div>
+          </div>
+
+          {/* CENTER: Main Interactive Map */}
+          <div className="flex-1 bg-[#0b0e14] border border-brand-border rounded-xl relative overflow-hidden shadow-2xl flex items-center justify-center group/map">
+             {/* Map Grid Background */}
+             <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:25px_25px]"></div>
+             
+             <div 
+                className="relative w-full h-full max-w-[650px] max-h-[650px] aspect-square flex items-center justify-center cursor-crosshair"
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const x = ((e.clientX - rect.left) / rect.width) * 100;
                   const y = ((e.clientY - rect.top) / rect.height) * 100;
                   const id = `curve-${Date.now()}`;
-                  setCircuitCurves([...circuitCurves, { id, name: `Curva ${circuitCurves.length + 1}`, type: 'Média', x, y }]);
+                  setCircuitCurves([...circuitCurves, { id, name: `Setor ${circuitCurves.length + 1}`, type: 'Média', x, y }]);
                 }}
-              >
-                 <div className="absolute inset-0 bg-[#0c0c0e]/90 pointer-events-none"></div>
-                 <img 
-                    src="https://files.catbox.moe/rbtosq.png" 
-                    className="w-full h-full object-contain opacity-40 brightness-150 contrast-125 grayscale"
-                    alt="Circuit map"
-                  />
-                  {circuitCurves.map((curve) => (
-                    <div 
-                      key={curve.id}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-2 z-10"
-                      style={{ left: `${curve.x}%`, top: `${curve.y}%` }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className={`w-4 h-4 rounded-full border-2 border-white shadow-xl ${
-                        curve.type === 'Alta' ? 'bg-red-500' : curve.type === 'Média' ? 'bg-orange-500' : 'bg-blue-500'
-                      }`} />
-                      <span className="absolute top-6 left-1/2 -translate-x-1/2 bg-black/80 text-[8px] font-black p-1 rounded whitespace-nowrap text-white uppercase tracking-tighter border border-white/10">{curve.name}</span>
-                      <button 
-                        onClick={() => setCircuitCurves(circuitCurves.filter(c => c.id !== curve.id))}
-                        className="absolute -top-1 -right-1 bg-red-600 text-white p-0.5 rounded-full hover:bg-white hover:text-red-600 transition-colors"
-                      >
-                        <X className="w-2.5 h-2.5" />
-                      </button>
+             >
+                <img 
+                   src="https://files.catbox.moe/rbtosq.png" 
+                   className="w-[90%] h-[90%] object-contain opacity-60 brightness-150 contrast-125 transition-all duration-700 group-hover/map:scale-105"
+                   alt="Circuit layout"
+                />
+
+                {/* Scanning HUD Elements */}
+                <div className="absolute inset-0 border-[20px] border-transparent border-t-white/5 border-l-white/5 pointer-events-none"></div>
+                <div className="absolute top-8 left-8 flex flex-col gap-1 pointer-events-none">
+                   <span className="text-[10px] font-black text-brand-red uppercase tracking-[0.3em] font-sans">Circuit_Analysis.sys</span>
+                   <span className="text-[8px] font-bold text-white/40 uppercase">Sectors_Loaded: {circuitCurves.length}</span>
+                </div>
+
+                {circuitCurves.map((curve) => (
+                  <div 
+                    key={curve.id}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-3 z-10 group/point"
+                    style={{ left: `${curve.x}%`, top: `${curve.y}%` }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className={`w-5 h-5 rounded-full border-2 border-white shadow-[0_0_20px_white] transition-all group-hover/point:scale-125 ${
+                      curve.type === 'Alta' ? 'bg-red-500 shadow-red-500/50' : 
+                      curve.type === 'Média' ? 'bg-orange-500 shadow-orange-500/50' : 
+                      'bg-cyan-500 shadow-cyan-500/50'
+                    }`} />
+                    
+                    <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover/point:opacity-100 transition-all pointer-events-none scale-90 group-hover/point:scale-100">
+                       <span className="text-[9px] font-black text-white uppercase tracking-wider">{curve.name}</span>
                     </div>
-                  ))}
-              </div>
-            </div>
+
+                    <button 
+                      onClick={() => setCircuitCurves(circuitCurves.filter(c => c.id !== curve.id))}
+                      className="absolute -top-1 -right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover/point:opacity-100 hover:bg-white hover:text-red-600 transition-all shadow-xl"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+             </div>
+
+             {/* Bottom Tooltip */}
+             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-cyan-600/90 backdrop-blur-md px-6 py-2.5 rounded-sm border-l-4 border-white shadow-xl">
+                <p className="text-[10px] font-black text-white uppercase tracking-[0.15em] flex items-center gap-3">
+                   <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+                   Clique no traçado para marcar novos setores de ultrapassagem
+                </p>
+             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-[#121214] border border-brand-border rounded-lg p-6">
-              <h3 className="font-display text-xl italic text-white mb-6">PONTOS DO GRID</h3>
-              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+          {/* RIGHT: List & Properties */}
+          <div className="w-full lg:w-80 bg-[#0b0e14] border border-brand-border rounded-xl p-5 flex flex-col shadow-2xl">
+             <div className="flex justify-between items-center mb-6">
+                <h4 className="font-display text-lg text-white italic font-black uppercase tracking-tight">Setores</h4>
+                <div className="bg-brand-red text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">Ativos</div>
+             </div>
+
+             <div className="space-y-4 flex-grow overflow-y-auto pr-2 custom-scrollbar">
                 {circuitCurves.map((curve, idx) => (
-                  <div key={curve.id} className="bg-brand-surface p-4 rounded border border-brand-border/50 space-y-3 hover:border-brand-red/50 transition-colors">
+                  <div key={curve.id} className="bg-[#161b22] border border-brand-border p-4 rounded-lg space-y-3 group hover:border-brand-red transition-all">
                     <div className="flex justify-between items-center">
-                      <span className="text-[9px] font-black text-brand-red uppercase tracking-widest">PONTO ESTRATÉGICO #{idx + 1}</span>
-                      <button onClick={() => setCircuitCurves(circuitCurves.filter(c => c.id !== curve.id))} className="text-brand-text-muted hover:text-brand-red"><Trash2 className="w-3.5 h-3.5"/></button>
+                      <span className="text-[9px] font-black text-brand-red uppercase tracking-widest">ID #{idx + 1}</span>
+                      <Edit className="w-3.5 h-3.5 text-brand-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
+                    
                     <input 
                       type="text" 
                       value={curve.name} 
@@ -210,8 +283,10 @@ export default function AdminView() {
                         newCurves[idx].name = e.target.value;
                         setCircuitCurves(newCurves);
                       }}
-                      className="w-full bg-brand-bg border border-brand-border p-2 rounded text-[11px] font-black uppercase text-white focus:border-brand-red outline-none transition-colors"
+                      className="w-full bg-[#0b0e14] border border-brand-border p-2.5 rounded text-[11px] font-bold text-white focus:border-brand-red outline-none"
+                      placeholder="Nome do Setor"
                     />
+
                     <select 
                       value={curve.type} 
                       onChange={(e) => {
@@ -219,7 +294,7 @@ export default function AdminView() {
                         newCurves[idx].type = e.target.value as any;
                         setCircuitCurves(newCurves);
                       }}
-                      className="w-full bg-brand-bg border border-brand-border p-2 rounded text-[9px] font-black uppercase text-brand-text-muted focus:text-white transition-colors cursor-pointer"
+                      className="w-full bg-[#0b0e14] border border-brand-border p-2.5 rounded text-[9px] font-black uppercase text-brand-text-muted focus:text-white"
                     >
                       <option value="Baixa">BAIXA VELOCIDADE</option>
                       <option value="Média">MÉDIA VELOCIDADE</option>
@@ -227,14 +302,18 @@ export default function AdminView() {
                     </select>
                   </div>
                 ))}
+
                 {circuitCurves.length === 0 && (
-                  <div className="text-center py-12 border border-dashed border-brand-border/50 rounded">
-                    <p className="text-brand-text-muted text-[10px] uppercase font-black tracking-widest">Pista Limpa</p>
-                    <p className="text-[9px] text-brand-text-muted mt-2">Clique no mapa para marcar curvas.</p>
+                  <div className="flex flex-col items-center justify-center py-20 text-center opacity-40">
+                     <MapIcon className="w-12 h-12 mb-4" />
+                     <p className="text-[10px] font-black uppercase tracking-widest leading-loose">Aguardando dados de telemetria...<br/>Marque um ponto no traçado.</p>
                   </div>
                 )}
-              </div>
-            </div>
+             </div>
+
+             <button className="mt-6 w-full bg-brand-red hover:bg-brand-red-hover text-white py-4 rounded font-display italic font-black uppercase tracking-widest transition-all shadow-xl">
+               ADICIONAR ESTRATÉGIA
+             </button>
           </div>
         </div>
       )}

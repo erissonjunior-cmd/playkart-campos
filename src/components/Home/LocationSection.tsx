@@ -16,7 +16,7 @@ export default function LocationSection() {
         {/* Left: Map */}
         <div className="relative group">
           <div className="absolute -inset-1 bg-brand-red opacity-20 group-hover:opacity-40 transition-opacity blur-sm rounded-lg"></div>
-          <div className="relative h-[400px] w-full bg-[#1a1a1f] border border-brand-border rounded-lg overflow-hidden grayscale contrast-125 hover:grayscale-0 transition-all duration-700">
+          <div className="relative h-[400px] w-full bg-[#1a1a1f] border border-brand-border rounded-lg overflow-hidden hover:scale-[1.01] transition-all duration-700 shadow-[0_0_30px_rgba(227,6,19,0.15)]">
             <iframe
               src={mapEmbed}
               width="100%"
