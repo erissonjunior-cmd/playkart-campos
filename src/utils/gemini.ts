@@ -9,7 +9,7 @@ export async function generateTrackBlueprint(base64Image: string) {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Remove base64 header if present
     const cleanBase64 = base64Image.split(",")[1] || base64Image;
