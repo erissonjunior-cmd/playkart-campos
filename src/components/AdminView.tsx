@@ -179,14 +179,19 @@ export default function AdminView() {
               )}
             </div>
 
-            <div className="flex-1 relative aspect-video bg-black/40 rounded-xl border border-brand-border overflow-hidden">
+            <div className="flex-1 relative aspect-video bg-[#f2e8cf] rounded-xl border border-[#bc6c25]/30 overflow-hidden shadow-inner">
+              {/* Grid Background */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(#bc6c25_1px,transparent_1px),linear-gradient(90deg,#bc6c25_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+              
               {circuitPath && (
-                <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full p-[10%] drop-shadow-[0_0_20px_rgba(239,68,68,0.5)] z-10 pointer-events-none">
-                  <path d={circuitPath} fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse" />
+                <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full p-[10%] z-10 pointer-events-none">
+                  <path d={circuitPath} fill="none" stroke="#2b2d42" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Subtle technical glow */}
+                  <path d={circuitPath} fill="none" stroke="#bc6c25" strokeWidth="2" className="opacity-10" />
                 </svg>
               )}
-              <img src={circuitMapImage} className={`w-full h-full object-contain ${circuitPath ? 'opacity-30 blur-[2px]' : 'opacity-60'}`} alt="Circuit Map" />
-              <div className="absolute top-4 right-4 text-[8px] font-mono text-white/20 uppercase tracking-widest">Nano_Banana_Link_Active</div>
+              <img src={circuitMapImage} className={`w-full h-full object-contain ${circuitPath ? 'opacity-10 grayscale brightness-125' : 'opacity-60'}`} alt="Circuit Map" />
+              <div className="absolute top-4 right-4 text-[8px] font-mono text-[#bc6c25]/40 uppercase tracking-widest">Nano_Banana_v2.0</div>
             </div>
           </div>
         </div>

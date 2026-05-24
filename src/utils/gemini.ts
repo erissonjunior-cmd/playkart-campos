@@ -5,45 +5,36 @@ export async function generateTrackBlueprint(base64Image: string) {
     const cleanBase64 = base64Image.split(",")[1] || base64Image;
 
     const prompt = `
-      Analise esta foto aérea de um kartódromo. 
-      Sua tarefa é extrair a geometria do traçado da pista (delimitado pelos pneus) e transformá-la em uma representação técnica minimalista de "planta baixa".
+      Você é um arquiteto especialista em kartódromos.
+      Analise esta foto aérea e gere uma PLANTA BAIXA TÉCNICA detalhada.
       
-      RETORNE APENAS um objeto JSON com o seguinte formato:
+      ESTILO DO DESENHO:
+      1. Desenhe as BORDAS (as fileiras de pneus) interna e externa da pista.
+      2. Use um estilo de "sketch técnico" ou "blueprint".
+      3. O traçado deve ser contínuo e representar fielmente as curvas e zebras.
+      4. Inclua pequenas marcas que representem a textura dos pneus nas bordas.
+      
+      RETORNE APENAS um objeto JSON:
       {
-        "svgPath": "conteúdo do atributo 'd' de um elemento <path> do SVG que desenha o traçado completo",
-        "description": "Uma breve descrição técnica da complexidade do traçado",
-        "suggestion": "Uma dica técnica para os pilotos (ex: foco na curva 3)"
+        "svgPath": "o conteúdo do atributo 'd' do SVG contendo TODO o desenho técnico (bordas internas e externas)",
+        "description": "Explicação técnica do traçado",
+        "suggestion": "Dica de performance para o piloto"
       }
       
       IMPORTANTE:
-      1. O svgPath deve ser simplificado e contínuo, representando o eixo central da pista.
-      2. Assuma um viewBox de 0 0 100 100.
-      3. Seja preciso com as curvas e retas capturadas na imagem.
-      4. NÃO inclua nada além do JSON no seu retorno.
+      - O svgPath deve conter caminhos múltiplos para as duas bordas da pista.
+      - Assuma viewBox 0 0 100 100.
+      - O resultado deve parecer um desenho profissional de engenharia.
+      - NÃO adicione texto explicativo fora do JSON.
     `;
 
-    // Usando 2.0 Flash que o Scanner confirmou estar disponível
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  mimeType: "image/jpeg",
-                  data: cleanBase64
-                }
-              }
-            ]
-          }
-        ]
+        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }]
       })
     });
 

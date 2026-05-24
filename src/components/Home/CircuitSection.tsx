@@ -44,127 +44,93 @@ export default function CircuitSection() {
 
         {/* Right: Interactive Circuit Map */}
         <div className="flex-1 relative w-full lg:w-[600px] aspect-square flex items-center justify-center">
-          {/* Decorative Background */}
           <div className="absolute inset-0 bg-brand-red/5 blur-[120px] rounded-full"></div>
           
-          <div className="relative w-full h-full carbon-texture border border-brand-border/40 rounded-2xl overflow-hidden p-8 shadow-2xl skew-tag">
-            <div className="absolute inset-0 bg-[#0c0c0e]/80 backdrop-blur-sm pointer-events-none"></div>
-            
-            <div className="relative w-full h-full flex items-center justify-center unskew-child">
-                {/* Generated Blueprint Layer */}
-                {circuitPath && (
-                  <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full p-[8%] drop-shadow-[0_0_15px_rgba(239,68,68,0.3)] pointer-events-none z-10">
-                    <path 
-                      d={circuitPath} 
-                      fill="none" 
-                      stroke="rgba(239,68,68,0.9)" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-
-                <div className="relative w-full h-full flex items-center justify-center border-2 border-dashed border-brand-red/20 rounded-xl overflow-hidden">
-                  <img 
-                    src={circuitMapImage} 
-                    alt="Circuit Layout" 
-                    className={`w-full h-full object-contain ${circuitPath ? 'opacity-20 blur-[1px]' : 'opacity-60'} brightness-150 contrast-125 grayscale`}
+          <div className="relative w-full h-full bg-[#121214] border border-brand-border/40 rounded-2xl overflow-hidden p-6 shadow-2xl">
+            <div className="relative w-full h-full rounded-xl overflow-hidden bg-[#f2e8cf] border border-[#bc6c25]/20 group">
+              {/* Grid Lines */}
+              <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[linear-gradient(#bc6c25_1px,transparent_1px),linear-gradient(90deg,#bc6c25_1px,transparent_1px)] bg-[size:30px_30px]"></div>
+              
+              {/* Blueprint Layer */}
+              {circuitPath && (
+                <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full p-[8%] drop-shadow-[0_2px_10px_rgba(0,0,0,0.1)] z-10 pointer-events-none">
+                  <path 
+                    d={circuitPath} 
+                    fill="none" 
+                    stroke="#2b2d42" 
+                    strokeWidth="0.8" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    className="transition-all duration-1000"
                   />
-                  
-                  {/* Digital Overlay Effect */}
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] opacity-40"></div>
-                  
-                  {/* Dynamic Points (Curves) */}
-                  {circuitCurves.map((curve) => (
-                    <motion.div
-                      key={curve.id}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="absolute cursor-pointer group"
-                      style={{ left: `${curve.x}%`, top: `${curve.y}%` }}
-                      onMouseEnter={() => setActiveCurve(curve)}
-                      onMouseLeave={() => setActiveCurve(null)}
-                    >
-                        {/* Stylized Tyre Marker */}
-                        <div className="relative w-8 h-8 flex items-center justify-center transition-all group-hover:scale-125">
-                          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                            <circle cx="50" cy="50" r="45" fill="#141416" stroke="#2a2a2e" strokeWidth="8" />
-                            <circle cx="50" cy="50" r="30" fill="none" 
-                              stroke={
-                                curve.type === 'Alta' ? '#ef4444' : 
-                                curve.type === 'Média' ? '#f97316' : 
-                                '#06b6d4'
-                              } 
-                              strokeWidth="6" 
-                              className="opacity-70"
-                            />
-                            <circle cx="50" cy="50" r="18" fill="#080808" />
-                          </svg>
-                          <div className={`absolute inset-0 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity ${
-                            curve.type === 'Alta' ? 'bg-red-500' : 
-                            curve.type === 'Média' ? 'bg-orange-500' : 
-                            'bg-cyan-500'
-                          }`}></div>
-                          
-                          {/* Label */}
-                          <span className="absolute left-10 top-1/2 -translate-y-1/2 whitespace-nowrap bg-black/80 backdrop-blur-md px-2 py-0.5 border border-brand-border rounded text-[10px] font-black text-white uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-                            {curve.name}
-                          </span>
-                        </div>
-                    </motion.div>
-                  ))}
-               </div>
+                  <path 
+                    d={circuitPath} 
+                    fill="none" 
+                    stroke="#bc6c25" 
+                    strokeWidth="2.5" 
+                    className="opacity-5"
+                  />
+                </svg>
+              )}
 
-               {/* Active Info Popup */}
-               <AnimatePresence>
-                 {activeCurve && (
-                   <motion.div
-                     initial={{ opacity: 0, y: 10 }}
-                     animate={{ opacity: 1, y: 0 }}
-                     exit={{ opacity: 0, y: 10 }}
-                     className="absolute bottom-6 left-6 right-6 bg-brand-surface-high/95 backdrop-blur-xl border border-brand-red/30 p-4 rounded-lg shadow-2xl z-20"
-                   >
-                     <div className="flex justify-between items-center mb-1">
-                       <span className="font-display text-lg italic text-white font-black uppercase tracking-tight">{activeCurve.name}</span>
-                       <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${
-                         activeCurve.type === 'Alta' ? 'text-red-500 border-red-500' : 
-                         activeCurve.type === 'Média' ? 'text-orange-500 border-orange-500' : 
-                         'text-blue-500 border-blue-500'
-                       } uppercase`}>Curva de {activeCurve.type}</span>
-                     </div>
-                     <p className="text-[11px] text-brand-text-muted uppercase font-bold tracking-wider leading-tight">
-                       Ponto técnico estratégico para ultrapassagem e manutenção de momentum centrífugo.
-                     </p>
-                   </motion.div>
-                 )}
-               </AnimatePresence>
-            </div>
+              <img 
+                src={circuitMapImage} 
+                alt="Circuit Layout" 
+                className={`w-full h-full object-contain transition-all duration-1000 ${circuitPath ? 'opacity-10 grayscale brightness-125' : 'opacity-80'}`}
+              />
 
-            {/* SCANNING Effect */}
-            <div className="absolute left-0 right-0 h-1 bg-brand-red/30 animate-scan pointer-events-none"></div>
-            
-            <div className="absolute top-4 left-4 font-display text-[9px] text-brand-red/50 tracking-[0.3em] font-black">
-              TRACK_LAYOUT_V4.02<br/>
-              SCANNING_SECTORS...
+              {/* HUD Elements */}
+              <div className="absolute top-4 left-4 flex flex-col gap-1 pointer-events-none z-20">
+                <span className="text-[10px] font-black text-[#bc6c25] uppercase tracking-[0.3em]">Circuit_Analysis.sys</span>
+                <span className="text-[8px] font-bold text-black/40 uppercase">Sectors: {circuitCurves.length}</span>
+              </div>
+
+              {/* Curve Points */}
+              <div className="absolute inset-0 z-20">
+                {circuitCurves.map((curve) => (
+                  <motion.div
+                    key={curve.id}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="absolute cursor-pointer group/point"
+                    style={{ left: `${curve.x}%`, top: `${curve.y}%` }}
+                    onMouseEnter={() => setActiveCurve(curve)}
+                    onMouseLeave={() => setActiveCurve(null)}
+                  >
+                    <div className="relative w-6 h-6 flex items-center justify-center -translate-x-1/2 -translate-y-1/2">
+                      <div className={`w-3 h-3 rounded-full border-2 border-white shadow-xl transition-transform group-hover/point:scale-150 ${
+                        curve.type === 'Alta' ? 'bg-red-500' : curve.type === 'Média' ? 'bg-orange-500' : 'bg-cyan-500'
+                      }`}></div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Curve Tooltip */}
+              <AnimatePresence>
+                {activeCurve && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md border border-[#bc6c25]/20 p-4 rounded shadow-xl z-30"
+                  >
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-display text-lg italic text-[#2b2d42] font-black uppercase tracking-tight">{activeCurve.name}</span>
+                      <span className={`text-[8px] font-black px-2 py-0.5 rounded border ${
+                        activeCurve.type === 'Alta' ? 'text-red-500 border-red-500' : 
+                        activeCurve.type === 'Média' ? 'text-orange-500 border-orange-500' : 
+                        'text-cyan-500 border-cyan-500'
+                      } uppercase`}>Setor de {activeCurve.type}</span>
+                    </div>
+                    <p className="text-[10px] text-[#555] font-bold uppercase tracking-wider">Ponto de análise técnica Nano Banana.</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
       </div>
-      
-      <style>{`
-        @keyframes scan {
-          0% { top: 0; opacity: 0; }
-          50% { opacity: 0.5; }
-          100% { top: 100%; opacity: 0; }
-        }
-        .animate-scan {
-          animation: scan 3s linear infinite;
-        }
-        .unskew-child {
-          transform: skewX(10deg);
-        }
-      `}</style>
     </section>
   );
 }
