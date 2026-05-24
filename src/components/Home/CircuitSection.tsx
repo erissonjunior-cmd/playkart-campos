@@ -73,15 +73,32 @@ export default function CircuitSection() {
                       onMouseEnter={() => setActiveCurve(curve)}
                       onMouseLeave={() => setActiveCurve(null)}
                     >
-                      {/* Point Indicator */}
-                      <div className="relative">
-                        <div className={`w-4 h-4 rounded-full border-2 ${curve.type === 'Alta' ? 'bg-red-500 border-white' : curve.type === 'Média' ? 'bg-orange-500 border-white' : 'bg-blue-500 border-white'} shadow-[0_0_15px_rgba(255,255,255,0.5)] group-hover:scale-150 transition-transform`}></div>
-                        
-                        {/* Static Label */}
-                        <span className="absolute left-6 top-1/2 -translate-y-1/2 whitespace-nowrap bg-black/80 backdrop-blur-md px-2 py-0.5 border border-brand-border rounded text-[10px] font-black text-white uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-                          {curve.name}
-                        </span>
-                      </div>
+                        {/* Stylized Tyre Marker */}
+                        <div className="relative w-8 h-8 flex items-center justify-center transition-all group-hover:scale-125">
+                          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                            <circle cx="50" cy="50" r="45" fill="#141416" stroke="#2a2a2e" strokeWidth="8" />
+                            <circle cx="50" cy="50" r="30" fill="none" 
+                              stroke={
+                                curve.type === 'Alta' ? '#ef4444' : 
+                                curve.type === 'Média' ? '#f97316' : 
+                                '#06b6d4'
+                              } 
+                              strokeWidth="6" 
+                              className="opacity-70"
+                            />
+                            <circle cx="50" cy="50" r="18" fill="#080808" />
+                          </svg>
+                          <div className={`absolute inset-0 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity ${
+                            curve.type === 'Alta' ? 'bg-red-500' : 
+                            curve.type === 'Média' ? 'bg-orange-500' : 
+                            'bg-cyan-500'
+                          }`}></div>
+                          
+                          {/* Label */}
+                          <span className="absolute left-10 top-1/2 -translate-y-1/2 whitespace-nowrap bg-black/80 backdrop-blur-md px-2 py-0.5 border border-brand-border rounded text-[10px] font-black text-white uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
+                            {curve.name}
+                          </span>
+                        </div>
                     </motion.div>
                   ))}
                </div>

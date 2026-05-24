@@ -227,23 +227,48 @@ export default function AdminView() {
                 {circuitCurves.map((curve) => (
                   <div 
                     key={curve.id}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-3 z-10 group/point"
+                    className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-3 z-10 group/point cursor-pointer"
                     style={{ left: `${curve.x}%`, top: `${curve.y}%` }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className={`w-5 h-5 rounded-full border-2 border-white shadow-[0_0_20px_white] transition-all group-hover/point:scale-125 ${
-                      curve.type === 'Alta' ? 'bg-red-500 shadow-red-500/50' : 
-                      curve.type === 'Média' ? 'bg-orange-500 shadow-orange-500/50' : 
-                      'bg-cyan-500 shadow-cyan-500/50'
-                    }`} />
+                    {/* Stylized Tyre Marker */}
+                    <div className="relative w-8 h-8 flex items-center justify-center transition-all group-hover/point:scale-125 group-active/point:scale-95">
+                      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+                        {/* Tyre Body */}
+                        <circle cx="50" cy="50" r="45" fill="#141416" stroke="#2a2a2e" strokeWidth="8" />
+                        {/* Tread details */}
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#222" strokeWidth="2" strokeDasharray="6 4" />
+                        {/* Colored Compound Ring */}
+                        <circle cx="50" cy="50" r="30" fill="none" 
+                          stroke={
+                            curve.type === 'Alta' ? '#ef4444' : 
+                            curve.type === 'Média' ? '#f97316' : 
+                            '#06b6d4'
+                          } 
+                          strokeWidth="6" 
+                          className="opacity-80"
+                        />
+                        {/* Hub/Hole */}
+                        <circle cx="50" cy="50" r="18" fill="#080808" />
+                        {/* Inner rim detail */}
+                        <circle cx="50" cy="50" r="12" fill="none" stroke="#333" strokeWidth="1" />
+                      </svg>
+                      
+                      {/* Glow effect based on compound */}
+                      <div className={`absolute inset-0 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity ${
+                        curve.type === 'Alta' ? 'bg-red-500' : 
+                        curve.type === 'Média' ? 'bg-orange-500' : 
+                        'bg-cyan-500'
+                      }`}></div>
+                    </div>
                     
-                    <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover/point:opacity-100 transition-all pointer-events-none scale-90 group-hover/point:scale-100">
+                    <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover/point:opacity-100 transition-all pointer-events-none scale-90 group-hover/point:scale-100 z-50">
                        <span className="text-[9px] font-black text-white uppercase tracking-wider">{curve.name}</span>
                     </div>
 
                     <button 
                       onClick={() => setCircuitCurves(circuitCurves.filter(c => c.id !== curve.id))}
-                      className="absolute -top-1 -right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover/point:opacity-100 hover:bg-white hover:text-red-600 transition-all shadow-xl"
+                      className="absolute -top-1 -right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover/point:opacity-100 hover:bg-white hover:text-red-600 transition-all shadow-xl z-50"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
