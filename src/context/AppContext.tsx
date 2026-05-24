@@ -48,11 +48,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [quickSelections, setQuickSelections] = useState<{ date?: string; pilots?: number; category?: string; pilotName?: string } | null>(null);
   const [circuitCurves, setCircuitCurves] = useState<CircuitCurve[]>(() => 
     loadFromLocalStorage<CircuitCurve[]>('pk_campos_circuit_curves', [
-      { id: '1', name: 'S do Senna', type: 'Baixa', x: 20, y: 30 },
-      { id: '2', name: 'Curva do Sol', type: 'Média', x: 50, y: 60 },
-      { id: '3', name: 'Reta Oposta', type: 'Alta', x: 80, y: 20 }
+      { id: 'c1', name: 'Curva 1 – Largada',    type: 'Média', x: 47, y: 18 },
+      { id: 'c2', name: 'Curva 2 – Senna S',    type: 'Baixa', x: 72, y: 28 },
+      { id: 'c3', name: 'Curva 3 – Chicane',    type: 'Baixa', x: 80, y: 45 },
+      { id: 'c4', name: 'Curva 4 – Saída',      type: 'Média', x: 68, y: 62 },
+      { id: 'c5', name: 'Curva 5 – Ferradura',  type: 'Baixa', x: 50, y: 74 },
+      { id: 'c6', name: 'Curva 6 – Central',    type: 'Média', x: 32, y: 62 },
+      { id: 'c7', name: 'Curva 7 – Rápida',     type: 'Alta',  x: 20, y: 44 },
+      { id: 'c8', name: 'Curva 8 – Box',        type: 'Média', x: 30, y: 28 },
     ])
   );
+
+  // Kart grid positions (static test data for now)
+  const kartPositions = [
+    { id: 'k1', number: 1, pilot: 'Erisson Jr.',  x: 47, y: 14, color: '#ef4444' },
+    { id: 'k2', number: 2, pilot: 'Sarah Shift',  x: 50, y: 14, color: '#f97316' },
+    { id: 'k3', number: 3, pilot: 'Carlos D.',    x: 53, y: 14, color: '#06b6d4' },
+    { id: 'k4', number: 4, pilot: 'Marcus V.',    x: 47, y: 11, color: '#a855f7' },
+    { id: 'k5', number: 5, pilot: 'Ana P.',       x: 50, y: 11, color: '#22c55e' },
+  ];
+
 
   const [profile, setProfile] = useState<PilotProfile>(() => {
     const loaded = loadFromLocalStorage<PilotProfile>('pk_campos_profile', INITIAL_PILOT_PROFILE);
