@@ -1,7 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenAI({ apiKey: API_KEY, apiVersion: 'v1beta' });
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 export async function generateTrackBlueprint(base64Image: string) {
   if (!API_KEY) {
@@ -9,6 +9,8 @@ export async function generateTrackBlueprint(base64Image: string) {
   }
 
   try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
     // Remove base64 header if present
     const cleanBase64 = base64Image.split(",")[1] || base64Image;
 
@@ -30,25 +32,17 @@ export async function generateTrackBlueprint(base64Image: string) {
       4. NÃO inclua nada além do JSON no seu retorno.
     `;
 
-    const result = await genAI.models.generateContent({
-      model: "gemini-1.5-flash-latest",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                data: cleanBase64,
-                mimeType: "image/jpeg",
-              },
-            },
-          ],
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: cleanBase64,
+          mimeType: "image/jpeg",
         },
-      ],
-    });
+      },
+    ]);
 
-    const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const responseText = result.response.text();
     
     // Attempt to parse JSON from response
     try {
