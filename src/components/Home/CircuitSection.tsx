@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { CircuitCurve } from '../../types';
 
 export default function CircuitSection() {
-  const { circuitCurves } = useApp();
+  const { circuitCurves, circuitMapImage, circuitPath } = useApp();
   const [activeCurve, setActiveCurve] = useState<CircuitCurve | null>(null);
 
   // Stats for the circuit
@@ -51,12 +51,25 @@ export default function CircuitSection() {
             <div className="absolute inset-0 bg-[#0c0c0e]/80 backdrop-blur-sm pointer-events-none"></div>
             
             <div className="relative w-full h-full flex items-center justify-center unskew-child">
-               {/* Circuit Image Placeholder - In a real app, this would be an SVG or a scanned map */}
-               <div className="relative w-full h-full flex items-center justify-center border-2 border-dashed border-brand-red/20 rounded-xl overflow-hidden">
+                {/* Generated Blueprint Layer */}
+                {circuitPath && (
+                  <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full p-[8%] drop-shadow-[0_0_15px_rgba(239,68,68,0.3)] pointer-events-none z-10">
+                    <path 
+                      d={circuitPath} 
+                      fill="none" 
+                      stroke="rgba(239,68,68,0.9)" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+
+                <div className="relative w-full h-full flex items-center justify-center border-2 border-dashed border-brand-red/20 rounded-xl overflow-hidden">
                   <img 
-                    src="https://files.catbox.moe/rbtosq.png" // This is a placeholder circuit scan
+                    src={circuitMapImage} 
                     alt="Circuit Layout" 
-                    className="w-full h-full object-contain opacity-60 brightness-150 contrast-125 grayscale"
+                    className={`w-full h-full object-contain ${circuitPath ? 'opacity-20 blur-[1px]' : 'opacity-60'} brightness-150 contrast-125 grayscale`}
                   />
                   
                   {/* Digital Overlay Effect */}

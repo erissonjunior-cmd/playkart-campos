@@ -28,6 +28,10 @@ interface AppContextType {
   setQuickSelections: (selections: { date?: string; pilots?: number; category?: string; pilotName?: string } | null) => void;
   circuitCurves: CircuitCurve[];
   setCircuitCurves: (curves: CircuitCurve[]) => void;
+  circuitMapImage: string;
+  setCircuitMapImage: (url: string) => void;
+  circuitPath: string;
+  setCircuitPath: (path: string) => void;
   
   // Actions
   handleNavigate: (tab: ActiveTab) => void;
@@ -57,6 +61,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       { id: 'c7', name: 'Curva 7 – Rápida',     type: 'Alta',  x: 20, y: 44 },
       { id: 'c8', name: 'Curva 8 – Box',        type: 'Média', x: 30, y: 28 },
     ])
+  );
+
+  const [circuitMapImage, setCircuitMapImage] = useState<string>(() => 
+    loadFromLocalStorage<string>('pk_campos_circuit_map_image', 'https://files.catbox.moe/rbtosq.png')
+  );
+
+  const [circuitPath, setCircuitPath] = useState<string>(() => 
+    loadFromLocalStorage<string>('pk_campos_circuit_path', '')
   );
 
   // Kart grid positions (static test data for now)
@@ -155,6 +167,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToLocalStorage('pk_campos_bookings', bookings); }, [bookings]);
   useEffect(() => { saveToLocalStorage('pk_campos_rankings', rankings); }, [rankings]);
   useEffect(() => { saveToLocalStorage('pk_campos_circuit_curves', circuitCurves); }, [circuitCurves]);
+  useEffect(() => { saveToLocalStorage('pk_campos_circuit_map_image', circuitMapImage); }, [circuitMapImage]);
+  useEffect(() => { saveToLocalStorage('pk_campos_circuit_path', circuitPath); }, [circuitPath]);
 
   // Ensure master admin is always sync'd in local storage list if missing
   useEffect(() => {
@@ -289,7 +303,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       rankings, setRankings, quickSelections, setQuickSelections,
       handleNavigate, handleQuickBook, handleConfirmBooking, handleCancelBooking,
       handleUpdateSlot, handleUpdateProfile, handleLoginSuccess, handleRegisterPilot, handleLogout,
-      circuitCurves, setCircuitCurves
+      circuitCurves, setCircuitCurves, circuitMapImage, setCircuitMapImage, circuitPath, setCircuitPath
     }}>
       {children}
     </AppContext.Provider>

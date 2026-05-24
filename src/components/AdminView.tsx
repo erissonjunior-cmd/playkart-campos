@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { Users, Timer, Calendar, Edit, Trash2, X, Save, MapPin as MapIcon, Plus } from 'lucide-react';
+import { Users, Timer, Calendar, Edit, Trash2, X, Save, MapPin as MapIcon, Plus, Zap, ImageIcon, Loader2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { generateTrackBlueprint } from '../utils/gemini';
 import { PilotProfile, TimeSlot } from '../types';
 
 export default function AdminView() {
   const { 
     bookings, slots, registeredPilots, handleCancelBooking, handleUpdateSlot, handleUpdateProfile,
-    circuitCurves, setCircuitCurves
+    circuitCurves, setCircuitCurves, circuitMapImage, setCircuitMapImage, circuitPath, setCircuitPath
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'pilots' | 'bookings' | 'slots' | 'circuit'>('pilots');
   const [editingPilot, setEditingPilot] = useState<PilotProfile | null>(null);
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genStatus, setGenStatus] = useState('');
 
   const handleDeleteBooking = (id: string) => {
     if (confirm('Tem certeza que deseja cancelar essa reserva?')) handleCancelBooking(id);
@@ -34,6 +37,35 @@ export default function AdminView() {
 
   const updatePilotField = (field: keyof PilotProfile, value: string) => {
     if (editingPilot) setEditingPilot({ ...editingPilot, [field]: value });
+  };
+
+  const handleProcessBlueprint = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsGenerating(true);
+    setGenStatus('Iniciando análise Nano Banana...');
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result as string;
+      try {
+        setGenStatus('Identificando traçado e curvas...');
+        const result = await generateTrackBlueprint(base64);
+        
+        if (result.svgPath) {
+          setCircuitPath(result.svgPath);
+          setCircuitMapImage(base64);
+          alert('Planta baixa gerada com sucesso pela Nano Banana!');
+        }
+      } catch (err: any) {
+        alert('Erro na análise IA: ' + err.message);
+      } finally {
+        setIsGenerating(false);
+        setGenStatus('');
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const PilotField = ({ label, field, type = 'text', children }: { label: string; field: keyof PilotProfile; type?: string; children?: React.ReactNode }) => (
@@ -167,6 +199,38 @@ export default function AdminView() {
               >
                 <Trash2 className="w-3.5 h-3.5" /> LIMPAR TUDO
               </button>
+
+              <div className="relative group/gen">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  id="ia-upload" 
+                  className="hidden" 
+                  onChange={handleProcessBlueprint}
+                  disabled={isGenerating}
+                />
+                <label 
+                  htmlFor="ia-upload" 
+                  className={`w-full ${isGenerating ? 'bg-brand-red/30 cursor-wait' : 'bg-brand-red hover:bg-[#ff4d4d] cursor-pointer'} text-white py-4 rounded text-[11px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-2 shadow-[0_0_20px_rgba(239,68,68,0.2)] border border-brand-red/30`}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span className="text-[9px] animate-pulse">{genStatus || 'PROCESSANDO...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-5 h-5 fill-white" />
+                      PLANTA BAIXA IA
+                    </>
+                  )}
+                </label>
+                {!isGenerating && (
+                   <span className="absolute -top-10 left-0 right-0 bg-black/90 text-[9px] text-white p-2 rounded border border-brand-border opacity-0 group-hover/gen:opacity-100 transition-opacity pointer-events-none text-center">
+                     Envie uma foto da pista para gerar o traçado via IA
+                   </span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-3 flex-grow">
@@ -208,12 +272,35 @@ export default function AdminView() {
                   const x = ((e.clientX - rect.left) / rect.width) * 100;
                   const y = ((e.clientY - rect.top) / rect.height) * 100;
                   const id = `curve-${Date.now()}`;
-                  setCircuitCurves([...circuitCurves, { id, name: `Setor ${circuitCurves.length + 1}`, type: 'Média', x, y }]);
+                  setCircuitCurves([...circuitCurves, { id, name: `Setor ${circuitCurves.length + 1}`, type: 'Média', x: Math.round(x * 100) / 100, y: Math.round(y * 100) / 100 }]);
                 }}
              >
+                {/* Generated Blueprint Layer */}
+                {circuitPath && (
+                  <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full p-[10%] drop-shadow-[0_0_20px_rgba(239,68,68,0.4)] pointer-events-none z-0">
+                    <path 
+                      d={circuitPath} 
+                      fill="none" 
+                      stroke="rgba(239,68,68,0.8)" 
+                      strokeWidth="2.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className="animate-pulse"
+                    />
+                    <path 
+                      d={circuitPath} 
+                      fill="none" 
+                      stroke="white" 
+                      strokeWidth="0.5" 
+                      strokeDasharray="2 2"
+                      className="opacity-50"
+                    />
+                  </svg>
+                )}
+
                 <img 
-                   src="https://files.catbox.moe/rbtosq.png" 
-                   className="w-[90%] h-[90%] object-contain opacity-60 brightness-150 contrast-125 transition-all duration-700 group-hover/map:scale-105"
+                   src={circuitMapImage} 
+                   className={`w-[90%] h-[90%] object-contain ${circuitPath ? 'opacity-20 blur-[1px]' : 'opacity-60'} brightness-150 contrast-125 transition-all duration-700 group-hover/map:scale-105`}
                    alt="Circuit layout"
                 />
 
