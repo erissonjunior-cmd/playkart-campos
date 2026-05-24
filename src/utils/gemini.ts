@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenAI({ apiKey: API_KEY });
+const genAI = new GoogleGenAI({ apiKey: API_KEY, apiVersion: 'v1' });
 
 export async function generateTrackBlueprint(base64Image: string) {
   if (!API_KEY) {
