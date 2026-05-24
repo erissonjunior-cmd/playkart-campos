@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || "";
+const API_KEY = "AIzaSyA-hW4SE4Tk1obhukGVEwTeWvnBCoi-4IE";
 const genAI = new GoogleGenerativeAI(API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export async function generateTrackBlueprint(base64Image: string) {
   if (!API_KEY) {
@@ -9,8 +10,6 @@ export async function generateTrackBlueprint(base64Image: string) {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
     // Remove base64 header if present
     const cleanBase64 = base64Image.split(",")[1] || base64Image;
 
