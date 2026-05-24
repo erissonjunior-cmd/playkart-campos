@@ -1,14 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 const API_KEY = "AIzaSyDofT7mrIF2Dr58Sr_boOmVZQ_44RrQTMI";
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export async function generateTrackBlueprint(base64Image: string) {
-  if (!API_KEY) {
-    throw new Error("Gemini API Key não configurada. Por favor, adicione GEMINI_API_KEY ao seu arquivo .env");
-  }
-
   try {
     // Remove base64 header if present
     const cleanBase64 = base64Image.split(",")[1] || base64Image;
@@ -31,17 +23,43 @@ export async function generateTrackBlueprint(base64Image: string) {
       4. NÃO inclua nada além do JSON no seu retorno.
     `;
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: cleanBase64,
-          mimeType: "image/jpeg",
-        },
-      },
-    ]);
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-    const responseText = result.response.text();
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: "image/jpeg",
+                  data: cleanBase64
+                }
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.4,
+          topP: 1,
+          topK: 32,
+          maxOutputTokens: 2048,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Erro na API (${response.status}): ${JSON.stringify(errorData)}`);
+    }
+
+    const result = await response.json();
+    const responseText = result.candidates[0].content.parts[0].text;
     
     // Attempt to parse JSON from response
     try {
@@ -52,7 +70,7 @@ export async function generateTrackBlueprint(base64Image: string) {
       throw new Error("O AI gerou um formato inválido. Tente novamente.");
     }
   } catch (error: any) {
-    console.error("Gemini Error:", error);
+    console.error("Gemini Direct Error:", error);
     throw error;
   }
 }
