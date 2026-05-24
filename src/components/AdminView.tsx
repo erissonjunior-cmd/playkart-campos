@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Users, Timer, Calendar, Edit, Trash2, X, Save } from 'lucide-react';
+import { Users, Timer, Calendar, Edit, Trash2, X, Save, MapPin as MapIcon, Plus } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { PilotProfile, TimeSlot } from '../types';
 
 export default function AdminView() {
   const { 
-    bookings, slots, registeredPilots, handleCancelBooking, handleUpdateSlot, handleUpdateProfile 
+    bookings, slots, registeredPilots, handleCancelBooking, handleUpdateSlot, handleUpdateProfile,
+    circuitCurves, setCircuitCurves
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'pilots' | 'bookings' | 'slots'>('pilots');
+  const [activeTab, setActiveTab] = useState<'pilots' | 'bookings' | 'slots' | 'circuit'>('pilots');
   const [editingPilot, setEditingPilot] = useState<PilotProfile | null>(null);
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
 
@@ -53,7 +54,8 @@ export default function AdminView() {
         {[
           { tab: 'pilots', icon: <Users className="w-4 h-4"/>, label: 'Clientes' },
           { tab: 'bookings', icon: <Calendar className="w-4 h-4"/>, label: 'Agendamentos' },
-          { tab: 'slots', icon: <Timer className="w-4 h-4"/>, label: 'Sessões' }
+          { tab: 'slots', icon: <Timer className="w-4 h-4"/>, label: 'Sessões' },
+          { tab: 'circuit', icon: <MapIcon className="w-4 h-4"/>, label: 'Mapa do Circuito' }
         ].map(({ tab, icon, label }) => (
           <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-4 font-sans text-sm font-bold uppercase flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab ? 'text-brand-red border-brand-red' : 'text-brand-text-muted border-transparent hover:text-white'}`}>
             {icon}{label}
@@ -138,6 +140,102 @@ export default function AdminView() {
               <button onClick={() => setEditingSlot({...slot})} className="mt-6 w-full border border-brand-red text-brand-red py-2.5 uppercase text-xs font-black hover:bg-brand-red hover:text-white transition-all rounded">EDITAR</button>
             </div>
           ))}
+        </div>
+      )}
+
+      {activeTab === 'circuit' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-[#121214] border border-brand-border rounded-lg p-6">
+              <h3 className="font-display text-xl italic text-white mb-4">EDITOR DO TRAÇADO</h3>
+              <p className="text-brand-text-muted text-[10px] mb-6 uppercase tracking-wider font-extrabold flex items-center gap-2">
+                <span className="bg-brand-red w-2 h-2 rounded-full animate-pulse"></span>
+                Clique no mapa abaixo para posicionar ou remover um ponto estratégico.
+              </p>
+              
+              <div 
+                className="relative aspect-square w-full max-w-[500px] mx-auto border border-brand-red/20 rounded-xl overflow-hidden cursor-crosshair group shadow-2xl skew-tag"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = ((e.clientX - rect.left) / rect.width) * 100;
+                  const y = ((e.clientY - rect.top) / rect.height) * 100;
+                  const id = `curve-${Date.now()}`;
+                  setCircuitCurves([...circuitCurves, { id, name: `Curva ${circuitCurves.length + 1}`, type: 'Média', x, y }]);
+                }}
+              >
+                 <div className="absolute inset-0 bg-[#0c0c0e]/90 pointer-events-none"></div>
+                 <img 
+                    src="https://files.catbox.moe/rbtosq.png" 
+                    className="w-full h-full object-contain opacity-40 brightness-150 contrast-125 grayscale"
+                    alt="Circuit map"
+                  />
+                  {circuitCurves.map((curve) => (
+                    <div 
+                      key={curve.id}
+                      className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-2 z-10"
+                      style={{ left: `${curve.x}%`, top: `${curve.y}%` }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 border-white shadow-xl ${
+                        curve.type === 'Alta' ? 'bg-red-500' : curve.type === 'Média' ? 'bg-orange-500' : 'bg-blue-500'
+                      }`} />
+                      <span className="absolute top-6 left-1/2 -translate-x-1/2 bg-black/80 text-[8px] font-black p-1 rounded whitespace-nowrap text-white uppercase tracking-tighter border border-white/10">{curve.name}</span>
+                      <button 
+                        onClick={() => setCircuitCurves(circuitCurves.filter(c => c.id !== curve.id))}
+                        className="absolute -top-1 -right-1 bg-red-600 text-white p-0.5 rounded-full hover:bg-white hover:text-red-600 transition-colors"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-[#121214] border border-brand-border rounded-lg p-6">
+              <h3 className="font-display text-xl italic text-white mb-6">PONTOS DO GRID</h3>
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                {circuitCurves.map((curve, idx) => (
+                  <div key={curve.id} className="bg-brand-surface p-4 rounded border border-brand-border/50 space-y-3 hover:border-brand-red/50 transition-colors">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-black text-brand-red uppercase tracking-widest">PONTO ESTRATÉGICO #{idx + 1}</span>
+                      <button onClick={() => setCircuitCurves(circuitCurves.filter(c => c.id !== curve.id))} className="text-brand-text-muted hover:text-brand-red"><Trash2 className="w-3.5 h-3.5"/></button>
+                    </div>
+                    <input 
+                      type="text" 
+                      value={curve.name} 
+                      onChange={(e) => {
+                        const newCurves = [...circuitCurves];
+                        newCurves[idx].name = e.target.value;
+                        setCircuitCurves(newCurves);
+                      }}
+                      className="w-full bg-brand-bg border border-brand-border p-2 rounded text-[11px] font-black uppercase text-white focus:border-brand-red outline-none transition-colors"
+                    />
+                    <select 
+                      value={curve.type} 
+                      onChange={(e) => {
+                        const newCurves = [...circuitCurves];
+                        newCurves[idx].type = e.target.value as any;
+                        setCircuitCurves(newCurves);
+                      }}
+                      className="w-full bg-brand-bg border border-brand-border p-2 rounded text-[9px] font-black uppercase text-brand-text-muted focus:text-white transition-colors cursor-pointer"
+                    >
+                      <option value="Baixa">BAIXA VELOCIDADE</option>
+                      <option value="Média">MÉDIA VELOCIDADE</option>
+                      <option value="Alta">ALTA VELOCIDADE</option>
+                    </select>
+                  </div>
+                ))}
+                {circuitCurves.length === 0 && (
+                  <div className="text-center py-12 border border-dashed border-brand-border/50 rounded">
+                    <p className="text-brand-text-muted text-[10px] uppercase font-black tracking-widest">Pista Limpa</p>
+                    <p className="text-[9px] text-brand-text-muted mt-2">Clique no mapa para marcar curvas.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

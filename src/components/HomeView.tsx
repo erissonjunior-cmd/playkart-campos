@@ -2,8 +2,10 @@ import React from 'react';
 import HeroSection from './Home/HeroSection';
 import BookingWidget from './Home/BookingWidget';
 import HallOfFame from './Home/HallOfFame';
+import CircuitSection from './Home/CircuitSection';
 import GallerySection from './Home/GallerySection';
 import CTASection from './Home/CTASection';
+import LocationSection from './Home/LocationSection';
 
 export default function HomeView() {
   return (
@@ -12,6 +14,7 @@ export default function HomeView() {
       <BookingWidget />
       <HallOfFame />
       <GallerySection />
+      <LocationSection />
       <CTASection />
     </div>
   );

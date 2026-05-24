@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ActiveTab, TimeSlot, Booking, PilotProfile, RankingDriver } from '../types';
+import { ActiveTab, TimeSlot, Booking, PilotProfile, RankingDriver, CircuitCurve } from '../types';
 import { 
   INITIAL_TIME_SLOTS, 
   INITIAL_RANKINGS, 
@@ -26,6 +26,8 @@ interface AppContextType {
   setRankings: (rankings: RankingDriver[]) => void;
   quickSelections: { date?: string; pilots?: number; category?: string; pilotName?: string } | null;
   setQuickSelections: (selections: { date?: string; pilots?: number; category?: string; pilotName?: string } | null) => void;
+  circuitCurves: CircuitCurve[];
+  setCircuitCurves: (curves: CircuitCurve[]) => void;
   
   // Actions
   handleNavigate: (tab: ActiveTab) => void;
@@ -44,6 +46,13 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [quickSelections, setQuickSelections] = useState<{ date?: string; pilots?: number; category?: string; pilotName?: string } | null>(null);
+  const [circuitCurves, setCircuitCurves] = useState<CircuitCurve[]>(() => 
+    loadFromLocalStorage<CircuitCurve[]>('pk_campos_circuit_curves', [
+      { id: '1', name: 'S do Senna', type: 'Baixa', x: 20, y: 30 },
+      { id: '2', name: 'Curva do Sol', type: 'Média', x: 50, y: 60 },
+      { id: '3', name: 'Reta Oposta', type: 'Alta', x: 80, y: 20 }
+    ])
+  );
 
   const [profile, setProfile] = useState<PilotProfile>(() => {
     const loaded = loadFromLocalStorage<PilotProfile>('pk_campos_profile', INITIAL_PILOT_PROFILE);
@@ -130,6 +139,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToLocalStorage('pk_campos_slots', slots); }, [slots]);
   useEffect(() => { saveToLocalStorage('pk_campos_bookings', bookings); }, [bookings]);
   useEffect(() => { saveToLocalStorage('pk_campos_rankings', rankings); }, [rankings]);
+  useEffect(() => { saveToLocalStorage('pk_campos_circuit_curves', circuitCurves); }, [circuitCurves]);
 
   // Ensure master admin is always sync'd in local storage list if missing
   useEffect(() => {
@@ -263,7 +273,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       registeredPilots, setRegisteredPilots, slots, setSlots, bookings, setBookings,
       rankings, setRankings, quickSelections, setQuickSelections,
       handleNavigate, handleQuickBook, handleConfirmBooking, handleCancelBooking,
-      handleUpdateSlot, handleUpdateProfile, handleLoginSuccess, handleRegisterPilot, handleLogout
+      handleUpdateSlot, handleUpdateProfile, handleLoginSuccess, handleRegisterPilot, handleLogout,
+      circuitCurves, setCircuitCurves
     }}>
       {children}
     </AppContext.Provider>

@@ -112,9 +112,9 @@ export default function App() {
         <div className="flex justify-between items-center px-6 md:px-10 h-20 max-w-[1240px] mx-auto">
           
           <div onClick={() => handleNavigate('home')} className="flex items-center gap-3 cursor-pointer group select-none">
-            <span className="font-display text-4xl tracking-normal text-white flex items-center gap-2.5 group-hover:scale-105 transition-transform duration-300">
+            <span className="font-display text-4xl tracking-normal text-white flex items-center group-hover:scale-105 transition-transform duration-300">
               <span className="italic">PLAY<span className="text-brand-red">KART</span></span>
-              <span className="font-sans text-[10px] font-black uppercase tracking-[0.2em] text-[#d4d4d8] bg-brand-surface-high border border-brand-red px-2 py-0.5 rounded-sm select-none not-italic transition-colors">CAMPOS RACING</span>
+              <span className="text-[#d4d4d8] font-black uppercase tracking-tighter ml-1.5 opacity-90 transition-colors">CAMPOS</span>
             </span>
           </div>
 
@@ -259,7 +259,7 @@ export default function App() {
       <footer className="w-full py-16 border-t border-brand-border bg-[#0e0e0e]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6 md:px-10 max-w-[1200px] mx-auto text-xs text-brand-text-muted">
           <div className="flex flex-col gap-6">
-            <span className="font-display text-3xl text-white italic">PLAY<span className="text-brand-red">KART</span> CAMPOS</span>
+            <span className="font-display text-3xl text-white italic">PLAY<span className="text-brand-red">KART</span> <span className="not-italic tracking-tighter text-[#d4d4d8]">CAMPOS</span></span>
             <p>Circuito de corrida profissional certificado, academia de pilotos amadores e karts de última geração.</p>
           </div>
           <div className="grid grid-cols-2 gap-8">

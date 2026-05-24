@@ -57,4 +57,12 @@ export interface RankingDriver {
   tagline: string;
 }
 
+export interface CircuitCurve {
+  id: string;
+  name: string;
+  type: 'Alta' | 'Média' | 'Baixa';
+  x: number; // percentage 0-100
+  y: number; // percentage 0-100
+}
+
 export type ActiveTab = 'home' | 'calendar' | 'ranking' | 'profile' | 'admin';
