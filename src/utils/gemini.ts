@@ -28,7 +28,7 @@ export async function generateTrackBlueprint(base64Image: string) {
       - NÃO adicione texto explicativo fora do JSON.
     `;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
     const response = await fetch(url, {
       method: 'POST',
