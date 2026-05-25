@@ -70,15 +70,23 @@ export async function generateTrackBlueprint(base64Image: string) {
       }
 
       const data = await response.json();
-      const resultText = data.choices[0].message.content;
+      let resultText = data.choices[0].message.content;
       
-      const jsonMatch = resultText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        console.log(`Sucesso com o modelo: ${model}`);
-        return JSON.parse(jsonMatch[0]);
+      // Sanitização para evitar o erro "Bad control character"
+      // Remove quebras de linha e caracteres de controle que quebram o JSON.parse
+      const cleanedText = resultText.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+      
+      try {
+        const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          console.log(`Sucesso com o modelo: ${model}`);
+          return JSON.parse(jsonMatch[0]);
+        }
+        throw new Error("JSON não encontrado na resposta.");
+      } catch (e) {
+        console.warn("Falha ao parsear JSON limpo, tentando fallback bruto...");
+        return JSON.parse(resultText.replace(/\n/g, "\\n"));
       }
-      
-      throw new Error("Formato de resposta inválido.");
       
     } catch (error: any) {
       console.warn(`Falha no modelo ${model}:`, error.message);
