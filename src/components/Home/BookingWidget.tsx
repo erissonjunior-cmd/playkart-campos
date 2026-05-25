@@ -154,11 +154,14 @@ export default function BookingWidget() {
               {/* Grid background */}
               <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
 
-              {/* Circuit image */}
+              {/* Circuit image / Blueprint */}
               <img
-                src="https://files.catbox.moe/rbtosq.png"
+                src={JSON.parse(localStorage.getItem('kart_circuit_data') || '{}').blueprintImage || "https://files.catbox.moe/rbtosq.png"}
                 alt="Traçado"
-                className="w-[88%] h-[88%] object-contain opacity-55 brightness-150 contrast-125"
+                className="w-[88%] h-[88%] object-contain opacity-40 brightness-150 contrast-125 saturate-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
               />
 
               {/* Curve / Tyre markers */}
