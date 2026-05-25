@@ -1,213 +1,230 @@
-import React, { useState } from 'react';
-import { Users, Timer, Calendar, X, Save, Zap, ImageIcon, Loader2 } from 'lucide-react';
-import { useApp } from '../context/AppContext';
-import { generateTrackBlueprint } from '../utils/gemini';
-import { PilotProfile, TimeSlot } from '../types';
+import React, { useState, useEffect } from 'react';
+import { 
+  Camera, 
+  Save, 
+  Trash2, 
+  Upload, 
+  Layout, 
+  Map, 
+  Info,
+  ChevronRight,
+  Plus
+} from 'lucide-react';
 
-export default function AdminView() {
-  const { 
-    bookings, slots, registeredPilots, handleCancelBooking, handleUpdateSlot, handleUpdateProfile,
-    circuitMapImage, setCircuitMapImage, circuitPath, setCircuitPath
-  } = useApp();
+interface CircuitData {
+  circuitPath: string;
+  blueprintImage?: string;
+  description: string;
+  suggestion: string;
+}
 
-  const [activeTab, setActiveTab] = useState<'pilots' | 'bookings' | 'slots' | 'circuit'>('pilots');
-  const [editingPilot, setEditingPilot] = useState<PilotProfile | null>(null);
-  const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [genStatus, setGenStatus] = useState('');
+const AdminView: React.FC = () => {
+  const [circuitData, setCircuitData] = useState<CircuitData>({
+    circuitPath: '',
+    blueprintImage: '',
+    description: '',
+    suggestion: ''
+  });
+  const [blueprintImage, setBlueprintImage] = useState<string | null>(null);
 
-  const handleDeleteBooking = (id: string) => {
-    if (confirm('Tem certeza que deseja cancelar essa reserva?')) handleCancelBooking(id);
-  };
+  useEffect(() => {
+    const savedData = localStorage.getItem('kart_circuit_data');
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      setCircuitData(data);
+      if (data.blueprintImage) setBlueprintImage(data.blueprintImage);
+    }
+  }, []);
 
-  const handleSavePilot = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingPilot) { handleUpdateProfile(editingPilot); setEditingPilot(null); }
-  };
-
-  const handleSaveSlot = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingSlot) {
-      const used = editingSlot.totalKarts - editingSlot.availableKarts;
-      const available = Math.max(0, editingSlot.totalKarts - used);
-      handleUpdateSlot({ ...editingSlot, availableKarts: available, isFull: available === 0 });
-      setEditingSlot(null);
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBlueprintImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const updatePilotField = (field: keyof PilotProfile, value: string) => {
-    if (editingPilot) setEditingPilot({ ...editingPilot, [field]: value });
-  };
-
-  const handleProcessBlueprint = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsGenerating(true);
-    setGenStatus('Analisando via Nano Banana...');
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string;
-      try {
-        const result = await generateTrackBlueprint(base64);
-        if (result.svgPath) {
-          setCircuitPath(result.svgPath);
-          setCircuitMapImage(base64);
-          alert('Planta baixa gerada com sucesso!');
-        }
-      } catch (err: any) {
-        alert('Erro na análise IA: ' + err.message);
-      } finally {
-        setIsGenerating(false);
-        setGenStatus('');
-      }
+  const handleSaveBlueprint = () => {
+    if (!blueprintImage && !circuitData.description && !circuitData.suggestion) {
+      alert('Preencha os dados da planta antes de salvar.');
+      return;
+    }
+    
+    const updatedCircuit = {
+      ...circuitData,
+      blueprintImage: blueprintImage || '',
+      circuitPath: '' // Prioriza imagem manual
     };
-    reader.readAsDataURL(file);
+    
+    localStorage.setItem('kart_circuit_data', JSON.stringify(updatedCircuit));
+    setCircuitData(updatedCircuit);
+    alert('Planta oficial e análises salvas com sucesso!');
   };
 
-  const PilotField = ({ label, field, type = 'text', children }: { label: string; field: keyof PilotProfile; type?: string; children?: React.ReactNode }) => (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest">{label}</label>
-      {children ?? <input type={type} value={(editingPilot?.[field] as string) ?? ''} onChange={(e) => updatePilotField(field, e.target.value)} className="bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-xs font-semibold" />}
-    </div>
-  );
+  const handleResetBlueprint = () => {
+    if (confirm('Deseja resetar a planta atual?')) {
+      const resetData = {
+        circuitPath: '',
+        blueprintImage: '',
+        description: 'Circuito padrão carregado.',
+        suggestion: 'Prepare sua estratégia para este desafio!'
+      };
+      localStorage.setItem('kart_circuit_data', JSON.stringify(resetData));
+      setCircuitData(resetData);
+      setBlueprintImage(null);
+    }
+  };
 
   return (
-    <div className="w-full">
-      <div className="mb-10">
-        <h2 className="font-display text-4xl italic uppercase text-brand-red">ADMINISTRAÇÃO</h2>
-      </div>
-
-      <div className="flex border-b border-brand-border mb-8 overflow-x-auto">
-        {[
-          { tab: 'pilots', label: 'Clientes' },
-          { tab: 'bookings', label: 'Reservas' },
-          { tab: 'slots', label: 'Sessões' },
-          { tab: 'circuit', label: 'Nano Banana IA' }
-        ].map(({ tab, label }) => (
-          <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-4 font-sans text-sm font-bold uppercase border-b-2 transition-colors whitespace-nowrap ${activeTab === tab ? 'text-brand-red border-brand-red' : 'text-brand-text-muted border-transparent hover:text-white'}`}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === 'pilots' && (
-        <div className="bg-[#121214] border border-brand-border rounded-lg overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-brand-surface uppercase text-[10px] tracking-widest font-black text-brand-text-muted border-b border-brand-border">
-              <tr><th className="p-4">Piloto</th><th className="p-4">WhatsApp</th></tr>
-            </thead>
-            <tbody>
-              {registeredPilots.map((p, i) => (
-                <tr key={i} className="border-b border-brand-border/40 hover:bg-brand-surface-high/30">
-                  <td className="p-4 flex items-center gap-3">
-                    <img src={p.avatar} className="w-8 h-8 rounded-full border border-brand-border object-cover" />
-                    <span>{p.name} <span className="text-xs text-brand-text-muted italic">({p.nickname})</span></span>
-                  </td>
-                  <td className="p-4">{p.whatsapp || p.phone}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="min-h-screen bg-[#0a0a0b] text-white p-4 md:p-8 pt-24 font-sans">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-border/20 pb-8">
+          <div>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">
+              Portal <span className="text-brand-red underline decoration-brand-red/30 underline-offset-8">Admin</span>
+            </h1>
+            <p className="text-gray-500 mt-2 font-mono text-sm uppercase tracking-widest">Controle de Circuito & Pista</p>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={handleSaveBlueprint}
+              className="px-6 py-3 bg-brand-red text-white font-bold rounded-lg flex items-center gap-2 hover:bg-red-700 transition-all shadow-[0_0_20px_rgba(255,51,51,0.2)] active:scale-95"
+            >
+              <Save className="w-5 h-5" />
+              <span>Salvar Alterações</span>
+            </button>
+            <button 
+              onClick={handleResetBlueprint}
+              className="px-4 py-3 bg-white/5 text-gray-400 font-bold rounded-lg hover:bg-white/10 transition-all border border-white/10"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-      )}
 
-      {activeTab === 'bookings' && (
-        <div className="bg-[#121214] border border-brand-border rounded-lg overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-brand-surface uppercase text-[10px] tracking-widest font-black text-brand-text-muted border-b border-brand-border">
-              <tr><th className="p-4">Data/Hora</th><th className="p-4">Piloto</th><th className="p-4">Ação</th></tr>
-            </thead>
-            <tbody>
-              {bookings.map((b) => (
-                <tr key={b.id} className="border-b border-brand-border/40 hover:bg-brand-surface-high/30">
-                  <td className="p-4 font-bold">{b.date} • {b.time}</td>
-                  <td className="p-4">{b.pilotName}</td>
-                  <td className="p-4"><button onClick={() => handleDeleteBooking(b.id)} className="text-brand-red font-bold text-[10px] uppercase">Cancelar</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {activeTab === 'slots' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {slots.map((slot) => (
-            <div key={slot.id} className="bg-[#121214] border border-brand-border p-6 rounded-lg">
-              <span className="text-[10px] font-black uppercase text-brand-text-muted">{slot.type}</span>
-              <h3 className="font-display text-4xl text-white italic mt-3">{slot.time}</h3>
-              <button onClick={() => setEditingSlot({...slot})} className="mt-6 w-full border border-brand-red text-brand-red py-2.5 uppercase text-xs font-black rounded hover:bg-brand-red hover:text-white transition-all">EDITAR</button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {activeTab === 'circuit' && (
-        <div className="bg-brand-surface border border-brand-border rounded-xl p-8">
-          <div className="flex flex-col md:flex-row gap-10">
-            <div className="w-full md:w-80 space-y-6">
-              <h3 className="font-display text-2xl italic text-white uppercase flex items-center gap-2">
-                <Zap className="w-6 h-6 text-brand-red" /> NANO BANANA IA
-              </h3>
-              <p className="text-brand-text-muted text-sm leading-relaxed">
-                Envie a foto da pista e a IA gerará o traçado técnico automaticamente.
-              </p>
-              
-              <label className="block w-full cursor-pointer relative group">
-                <input type="file" className="hidden" accept="image/*" onChange={handleProcessBlueprint} disabled={isGenerating} />
-                <div className={`w-full py-12 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center gap-4 ${isGenerating ? 'border-brand-red/50 bg-brand-red/5' : 'border-brand-border group-hover:border-brand-red/50 group-hover:bg-brand-red/5'}`}>
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-10 h-10 text-brand-red animate-spin" />
-                      <span className="text-[10px] font-black text-brand-red uppercase animate-pulse">{genStatus}</span>
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className="w-10 h-10 text-brand-text-muted group-hover:text-brand-red" />
-                      <span className="text-[10px] font-black text-brand-text-muted group-hover:text-brand-red uppercase">Upload da Foto</span>
-                    </>
-                  )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Upload Column */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-[#121214] border border-brand-border/20 rounded-2xl overflow-hidden p-6 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+                <div className="p-2 bg-brand-red/10 rounded-lg">
+                  <Layout className="w-5 h-5 text-brand-red" />
                 </div>
-              </label>
-
-              {circuitPath && (
-                <button onClick={() => { setCircuitPath(''); setCircuitMapImage('https://files.catbox.moe/rbtosq.png'); }} className="w-full text-center text-brand-text-muted text-[10px] font-black uppercase hover:text-white transition-colors">
-                  Resetar Planta Baixa
-                </button>
-              )}
-            </div>
-
-            <div className="flex-1 relative aspect-video bg-[#f2e8cf] rounded-xl border border-[#bc6c25]/30 overflow-hidden shadow-inner">
-              {/* Grid Background */}
-              <div className="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(#bc6c25_1px,transparent_1px),linear-gradient(90deg,#bc6c25_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+                <h2 className="text-xl font-bold uppercase italic">Planta Oficial do Circuito</h2>
+              </div>
               
-              {circuitPath && (
-                <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full p-[10%] z-10 pointer-events-none">
-                  <path d={circuitPath} fill="none" stroke="#2b2d42" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
-                  {/* Subtle technical glow */}
-                  <path d={circuitPath} fill="none" stroke="#bc6c25" strokeWidth="2" className="opacity-10" />
-                </svg>
-              )}
-              <img src={circuitMapImage} className={`w-full h-full object-contain ${circuitPath ? 'opacity-10 grayscale brightness-125' : 'opacity-60'}`} alt="Circuit Map" />
-              <div className="absolute top-4 right-4 text-[8px] font-mono text-[#bc6c25]/40 uppercase tracking-widest">Nano_Banana_v2.0</div>
+              <div className="relative aspect-video rounded-xl bg-[#0a0a0b] border-2 border-dashed border-white/10 group overflow-hidden">
+                {blueprintImage ? (
+                  <div className="relative w-full h-full p-4">
+                    <div className="absolute inset-0 bg-[#f2e8cf]/90" />
+                    <div className="absolute inset-0" style={{ 
+                      backgroundImage: 'radial-gradient(#2b2d42 0.5px, transparent 0.5px)', 
+                      backgroundSize: '20px 20px',
+                      opacity: 0.2
+                    }} />
+                    <img 
+                      src={blueprintImage} 
+                      alt="Preview da Planta"
+                      className="relative w-full h-full object-contain filter contrast-125 saturate-0 mix-blend-multiply opacity-90"
+                    />
+                    <div className="absolute top-4 right-4 flex gap-2">
+                       <label className="p-3 bg-white/10 backdrop-blur-md rounded-lg cursor-pointer hover:bg-white/20 transition-all border border-white/20">
+                        <Plus className="w-5 h-5" />
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all">
+                    <div className="p-4 bg-brand-red/10 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                      <Upload className="w-8 h-8 text-brand-red" />
+                    </div>
+                    <span className="text-lg font-bold text-gray-400 italic">CARREGAR PLANTA BAIXA</span>
+                    <span className="text-sm text-gray-600 mt-2">Escolha o arquivo gerado no Gemini</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Info Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-[#121214] p-6 rounded-2xl border-l-4 border-brand-red shadow-lg">
+                <div className="flex items-center gap-3 mb-4">
+                  <Info className="w-5 h-5 text-brand-red" />
+                  <h3 className="font-bold uppercase tracking-widest text-sm">Análise Técnica</h3>
+                </div>
+                <textarea 
+                  value={circuitData.description}
+                  onChange={(e) => setCircuitData({...circuitData, description: e.target.value})}
+                  className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-gray-400 font-mono text-sm h-32 focus:border-brand-red focus:ring-0 transition-all"
+                  placeholder="Descreva as características técnicas do traçado..."
+                />
+              </div>
+
+              <div className="bg-[#121214] p-6 rounded-2xl border-l-4 border-emerald-500 shadow-lg">
+                <div className="flex items-center gap-3 mb-4">
+                  <ChevronRight className="w-5 h-5 text-emerald-500" />
+                  <h3 className="font-bold uppercase tracking-widest text-sm">Dica de Performance</h3>
+                </div>
+                <textarea 
+                  value={circuitData.suggestion}
+                  onChange={(e) => setCircuitData({...circuitData, suggestion: e.target.value})}
+                  className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-gray-400 font-mono text-sm h-32 focus:border-emerald-500 focus:ring-0 transition-all"
+                  placeholder="Dê uma dica crucial para os pilotos..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar Tips */}
+          <div className="space-y-6">
+            <div className="bg-brand-red/10 border border-brand-red/20 p-6 rounded-2xl">
+              <h3 className="text-brand-red font-black italic uppercase mb-4 flex items-center gap-2">
+                <Camera className="w-5 h-5" />
+                Dica Nano Banana
+              </h3>
+              <ul className="text-sm text-gray-400 space-y-4">
+                <li className="flex gap-3">
+                  <span className="text-brand-red font-bold">01.</span>
+                  <span>Use o Gemini Web para converter a foto aérea em uma "planta baixa técnica".</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-brand-red font-bold">02.</span>
+                  <span>Salve a imagem gerada e faça o upload aqui.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-brand-red font-bold">03.</span>
+                  <span>O sistema aplicará automaticamente o visual de blueprint do site.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-[#121214] p-6 rounded-2xl border border-white/5">
+              <h3 className="text-white font-bold uppercase tracking-tighter mb-4 flex items-center gap-2">
+                <Map className="w-5 h-5" />
+                Resumo do Circuito
+              </h3>
+              <div className="space-y-4">
+                <div className="flex justify-between text-sm py-2 border-b border-white/5">
+                  <span className="text-gray-500">Status</span>
+                  <span className="text-emerald-500 font-bold uppercase tracking-widest text-xs">Ativo</span>
+                </div>
+                <div className="flex justify-between text-sm py-2 border-b border-white/5">
+                  <span className="text-gray-500">Tipo</span>
+                  <span className="text-gray-300 italic">Pista Técnica</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      )}
-
-      {editingSlot && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-brand-border rounded-xl w-full max-w-md p-6">
-            <h3 className="font-display text-xl italic text-brand-red mb-6">EDITAR SESSÃO - {editingSlot.time}</h3>
-            <form onSubmit={handleSaveSlot} className="flex flex-col gap-4">
-              <input type="text" value={editingSlot.time} onChange={e => setEditingSlot({...editingSlot, time: e.target.value})} className="bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-xs" />
-              <button type="submit" className="bg-brand-red text-white py-3 rounded font-black tracking-widest transition-all hover:bg-brand-red-hover">SALVAR</button>
-            </form>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
-}
+};
+
+export default AdminView;
