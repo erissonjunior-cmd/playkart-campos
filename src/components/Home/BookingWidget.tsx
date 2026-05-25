@@ -161,37 +161,17 @@ export default function BookingWidget() {
                 }}
               />
 
-              {[
-                { id: 'k1', number: 1, pilot: 'Erisson Jr.',  x: 46, y: 13, color: '#ef4444' },
-                { id: 'k2', number: 2, pilot: 'Sarah Shift',  x: 49, y: 13, color: '#f97316' },
-                { id: 'k3', number: 3, pilot: 'Carlos D.',    x: 52, y: 13, color: '#06b6d4' },
-                { id: 'k4', number: 4, pilot: 'Marcus V.',    x: 46, y: 10, color: '#a855f7' },
-                { id: 'k5', number: 5, pilot: 'Ana P.',       x: 49, y: 10, color: '#22c55e' },
-              ].map((kart) => (
-                <div
-                  key={kart.id}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 z-20 group/kart"
-                  style={{ left: `${kart.x}%`, top: `${kart.y}%` }}
-                >
-                  <div
-                    className="w-4 h-4 rounded-sm flex items-center justify-center text-white font-black text-[8px] shadow-lg cursor-default transition-all group-hover/kart:scale-150 border border-white/30"
-                    style={{ backgroundColor: kart.color, boxShadow: `0 0 8px ${kart.color}66` }}
-                  >
-                    {kart.number}
-                  </div>
-                </div>
-              ))}
-
               <div className="absolute top-3 left-3 pointer-events-none">
                 <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.25em]">LIVE TRACK VIEW</span>
               </div>
             </div>
 
-            <div className="px-5 py-3 border-t border-brand-border/50 flex items-center justify-end">
-              <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-brand-text-muted">
-                <span className="w-3 h-3 rounded-sm bg-brand-red inline-block"></span>
-                <span className="ml-1">Kart Ativo</span>
+            <div className="px-5 py-3 border-t border-brand-border/50 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#e2e2e2]">SISTEMA OPERACIONAL</span>
               </div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-brand-text-muted italic">Ready</span>
             </div>
           </div>
 
