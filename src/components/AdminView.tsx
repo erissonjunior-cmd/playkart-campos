@@ -160,7 +160,7 @@ export default function AdminView({
           }`}
         >
           <Map className="w-4 h-4" />
-          Nano Banana IA
+          Mapa  
         </button>
       </div>
 
