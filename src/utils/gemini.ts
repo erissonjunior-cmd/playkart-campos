@@ -24,15 +24,18 @@ export async function generateTrackBlueprint(base64Image: string) {
       IMPORTANTE:
       - O svgPath deve conter caminhos múltiplos para as duas bordas da pista.
       - Assuma viewBox 0 0 100 100.
-      - O resultado deve parecer um desenho profissional de engenharia.
       - NÃO adicione texto explicativo fora do JSON.
     `;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+    // Usando v1beta e o nome EXATO que o scanner mostrou
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-goog-api-key': API_KEY // Tentando passar a chave via Header
+      },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }]
       })
