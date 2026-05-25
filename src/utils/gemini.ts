@@ -34,7 +34,7 @@ export async function generateTrackBlueprint(base64Image: string) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.2-11b-vision",
+        model: "llava-v1.5-7b-4096-preview",
         messages: [
           {
             role: "user",
