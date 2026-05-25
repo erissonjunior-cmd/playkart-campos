@@ -36,7 +36,20 @@ export async function generateTrackBlueprint(base64Image: string) {
               content: [
                 {
                   type: "text",
-                  text: "Você é um arquiteto especialista em kartódromos. Analise esta foto aérea e gere um JSON com { 'svgPath': 'o traçado técnico (d do SVG)', 'description': 'texto', 'suggestion': 'texto' }. Retorne APENAS o JSON puro."
+                  text: `Analise esta foto aérea e gere uma PLANTA BAIXA TÉCNICA (BLUEPRINT) detalhada do traçado da pista de kart.
+      
+      INSTRUÇÕES RIGOROSAS:
+      1. Extraia o traçado exato das bordas interna e externa (duas linhas paralelas).
+      2. O 'svgPath' deve ser uma string LONGA e DETALHADA de comandos SVG (M, L, C, Z) que desenhem toda a pista.
+      3. Use o sistema de coordenadas de 0 a 100 (viewBox="0 0 100 100").
+      4. O desenho deve ser um esboço técnico limpo, sem fundo, focado apenas no traçado.
+      
+      RETORNE APENAS JSON:
+      {
+        "svgPath": "M 10,10 L 90,10 ... (exemplo de traçado real da foto)",
+        "description": "Explicação técnica detalhada das curvas",
+        "suggestion": "Onde frear e acelerar"
+      }`
                 },
                 {
                   type: "image_url",
