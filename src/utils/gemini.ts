@@ -1,52 +1,74 @@
-// Tentativa final: v1 estável com dupla identificação
-const API_KEY = "AIzaSyDofT7mrIF2Dr58Sr_boOmVZQ_44RrQTMI";
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || "";
 
 export async function generateTrackBlueprint(base64Image: string) {
   try {
-    const cleanBase64 = base64Image.split(",")[1] || base64Image;
+    if (!OPENROUTER_API_KEY) {
+      throw new Error("A chave VITE_OPENROUTER_API_KEY não foi configurada no Render.");
+    }
 
     const prompt = `
       Você é um arquiteto especialista em kartódromos.
       Analise esta foto aérea e gere uma PLANTA BAIXA TÉCNICA detalhada do traçado da pista.
       
-      RETORNE APENAS um objeto JSON:
+      ESTILO DO DESENHO (Obrigatório):
+      1. Desenhe as BORDAS (as fileiras de pneus) interna e externa da pista.
+      2. Use um estilo de "sketch técnico" ou "blueprint".
+      3. O traçado deve ser contínuo e representar fielmente as curvas e zebras.
+      
+      RETORNE APENAS um objeto JSON válido (sem textos extras):
       {
-        "svgPath": "conteúdo do atributo 'd' do SVG",
-        "description": "Explicação técnica",
-        "suggestion": "Dica de performance"
+        "svgPath": "conteúdo do atributo 'd' de um elemento <path> contendo as bordas e detalhes da pista (ViewBox 0 0 100 100)",
+        "description": "Explicação técnica do traçado capturado",
+        "suggestion": "Dica de performance baseada no traçado"
       }
     `;
 
-    // Usando v1 (ESTÁVEL) e o nome exato do modelo
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-goog-api-key': API_KEY 
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://playkart-campos.onrender.com", // Obrigatório p/ OpenRouter
+        "X-Title": "PlayKart Campos"
       },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }]
+        model: "google/gemini-flash-1.5-exp:free",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              {
+                type: "image_url",
+                image_url: {
+                  url: base64Image.startsWith('data:') ? base64Image : `data:image/jpeg;base64,${base64Image}`
+                }
+              }
+            ]
+          }
+        ],
+        response_format: { type: "json_object" }
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Erro API: ${errorData.error?.message || response.statusText}`);
+      throw new Error(`Erro OpenRouter: ${errorData.error?.message || response.statusText}`);
     }
 
-    const result = await response.json();
-    const responseText = result.candidates[0].content.parts[0].text;
+    const data = await response.json();
+    const resultText = data.choices[0].message.content;
     
     try {
-      const jsonStr = responseText.match(/\{[\s\S]*\}/)?.[0] || responseText;
-      return JSON.parse(jsonStr);
+      return JSON.parse(resultText);
     } catch (e) {
-      throw new Error("Resposta inválida.");
+      // Fallback para extração manual de JSON se a IA não respeitar o formato
+      const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) return JSON.parse(jsonMatch[0]);
+      throw new Error("Formato de resposta inválido.");
     }
   } catch (error: any) {
-    console.error("Gemini Error:", error);
+    console.error("AI Generation Error:", error);
     throw error;
   }
 }
