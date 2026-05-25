@@ -32,7 +32,7 @@ export async function generateTrackBlueprint(base64Image: string) {
         "X-Title": "PlayKart Campos"
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3.2-90b-vision-instruct",
+        model: "meta-llama/llama-3.2-11b-vision-instruct",
         messages: [
           {
             role: "user",
