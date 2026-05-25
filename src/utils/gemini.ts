@@ -1,4 +1,4 @@
-// Voltando para o Google com o modelo 8B (que é o mais resiliente de todos)
+// Tentativa final: v1 estável com dupla identificação
 const API_KEY = "AIzaSyDofT7mrIF2Dr58Sr_boOmVZQ_44RrQTMI";
 
 export async function generateTrackBlueprint(base64Image: string) {
@@ -9,29 +9,23 @@ export async function generateTrackBlueprint(base64Image: string) {
       Você é um arquiteto especialista em kartódromos.
       Analise esta foto aérea e gere uma PLANTA BAIXA TÉCNICA detalhada do traçado da pista.
       
-      ESTILO DO DESENHO (Obrigatório):
-      1. Desenhe as BORDAS (as fileiras de pneus) interna e externa da pista.
-      2. Use um estilo de "sketch técnico" ou "blueprint".
-      3. O traçado deve ser contínuo e representar fielmente as curvas e zebras.
-      
-      RETORNE APENAS um objeto JSON válido (sem textos extras):
+      RETORNE APENAS um objeto JSON:
       {
-        "svgPath": "conteúdo do atributo 'd' de um elemento <path> contendo as bordas e detalhes da pista (ViewBox 0 0 100 100)",
-        "description": "Explicação técnica do traçado capturado",
-        "suggestion": "Dica de performance baseada no traçado"
+        "svgPath": "conteúdo do atributo 'd' do SVG",
+        "description": "Explicação técnica",
+        "suggestion": "Dica de performance"
       }
-      
-      IMPORTANTE:
-      - O svgPath DEVE SER UM SVG PATH VÁLIDO.
-      - NÃO adicione blocos de código Markdown ou conversas, APENAS O JSON.
     `;
 
-    // Usando o modelo 8B-Latest que é o mais provável de estar livre
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b-latest:generateContent?key=${API_KEY}`;
+    // Usando v1 (ESTÁVEL) e o nome exato do modelo
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-goog-api-key': API_KEY 
+      },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }]
       })
@@ -49,7 +43,7 @@ export async function generateTrackBlueprint(base64Image: string) {
       const jsonStr = responseText.match(/\{[\s\S]*\}/)?.[0] || responseText;
       return JSON.parse(jsonStr);
     } catch (e) {
-      throw new Error("Formato de resposta inválido da IA.");
+      throw new Error("Resposta inválida.");
     }
   } catch (error: any) {
     console.error("Gemini Error:", error);
