@@ -5,36 +5,37 @@ export async function generateTrackBlueprint(base64Image: string) {
     const cleanBase64 = base64Image.split(",")[1] || base64Image;
 
     const prompt = `
-      Você é um arquiteto especialista em kartódromos.
-      Analise esta foto aérea e gere uma PLANTA BAIXA TÉCNICA detalhada.
+      Você é um CARTOGRAFISTA TÉCNICO de pistas de corrida.
+      Sua tarefa é transformar a imagem aérea de um kartódromo em uma PLANTA BAIXA TÉCNICA PROFISSIONAL.
       
-      ESTILO DO DESENHO:
-      1. Desenhe as BORDAS (as fileiras de pneus) interna e externa da pista.
-      2. Use um estilo de "sketch técnico" ou "blueprint".
-      3. O traçado deve ser contínuo e representar fielmente as curvas e zebras.
-      4. Inclua pequenas marcas que representem a textura dos pneus nas bordas.
+      REFERÊNCIA DE ESTILO (Siga rigorosamente):
+      1. Desenhe as barreiras de pneus usando círculos pequenos contínuos.
+      2. Desenhe o traçado central e as bordas internas/externas.
+      3. Use um traço preto limpo sobre fundo técnico (estilo blueprint/nanquim).
+      4. Adicione elementos visuais de engenharia (setas de fluxo, indicações de curvas).
+      5. O traçado deve ser geométrica e tecnicamente preciso.
       
       RETORNE APENAS um objeto JSON:
       {
-        "svgPath": "o conteúdo do atributo 'd' do SVG contendo TODO o desenho técnico (bordas internas e externas)",
-        "description": "Explicação técnica do traçado",
-        "suggestion": "Dica de performance para o piloto"
+        "svgPath": "todo o desenho SVG (caminhos, círculos de pneus, setas) condensados no atributo 'd' ou agrupados",
+        "description": "Análise técnica do layout da pista",
+        "suggestion": "Melhor traçado para tempo de volta"
       }
       
       IMPORTANTE:
-      - O svgPath deve conter caminhos múltiplos para as duas bordas da pista.
-      - Assuma viewBox 0 0 100 100.
+      - Foque na estética de 'Desenho Técnico à Mão'.
+      - ViewBox 0 0 100 100.
       - NÃO adicione texto explicativo fora do JSON.
     `;
 
-    // Usando v1beta e o nome EXATO que o scanner mostrou
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+    // Tentando o modelo experimental que costuma ter quotas diferentes e evitar o 404
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`;
 
     const response = await fetch(url, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'x-goog-api-key': API_KEY // Tentando passar a chave via Header
+        'x-goog-api-key': API_KEY 
       },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }]
