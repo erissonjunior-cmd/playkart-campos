@@ -1,10 +1,9 @@
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
+// Voltando para o Google com o modelo 8B (que é o mais resiliente de todos)
+const API_KEY = "AIzaSyDofT7mrIF2Dr58Sr_boOmVZQ_44RrQTMI";
 
 export async function generateTrackBlueprint(base64Image: string) {
   try {
-    if (!GROQ_API_KEY) {
-      throw new Error("Chave VITE_GROQ_API_KEY não encontrada.");
-    }
+    const cleanBase64 = base64Image.split(",")[1] || base64Image;
 
     const prompt = `
       Você é um arquiteto especialista em kartódromos.
@@ -27,44 +26,33 @@ export async function generateTrackBlueprint(base64Image: string) {
       - NÃO adicione blocos de código Markdown ou conversas, APENAS O JSON.
     `;
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json"
-      },
+    // Usando o modelo 8B-Latest que é o mais provável de estar livre
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b-latest:generateContent?key=${API_KEY}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: "llava-v1.5-7b-4096-preview",
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: prompt },
-              {
-                type: "image_url",
-                image_url: {
-                  url: base64Image.startsWith('data:') ? base64Image : `data:image/jpeg;base64,${base64Image}`
-                }
-              }
-            ]
-          }
-        ],
-        temperature: 0.1,
-        response_format: { type: "json_object" }
+        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }]
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Erro Groq: ${errorData.error?.message || response.statusText}`);
+      throw new Error(`Erro API: ${errorData.error?.message || response.statusText}`);
     }
 
-    const data = await response.json();
-    const result = JSON.parse(data.choices[0].message.content);
+    const result = await response.json();
+    const responseText = result.candidates[0].content.parts[0].text;
     
-    return result;
+    try {
+      const jsonStr = responseText.match(/\{[\s\S]*\}/)?.[0] || responseText;
+      return JSON.parse(jsonStr);
+    } catch (e) {
+      throw new Error("Formato de resposta inválido da IA.");
+    }
   } catch (error: any) {
-    console.error("Groq Error:", error);
+    console.error("Gemini Error:", error);
     throw error;
   }
 }
