@@ -14,8 +14,14 @@ import {
   Map, 
   Info,
   ChevronRight,
-  Plus
+  Plus,
+  ArrowLeft,
+  Clock,
+  DollarSign,
+  Gamepad2,
+  Trash
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface AdminViewProps {
   bookings: Booking[];
@@ -49,6 +55,13 @@ export default function AdminView({
     suggestion: ''
   });
   const [blueprintImage, setBlueprintImage] = useState<string | null>(null);
+  
+  // Slot Editing State
+  const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
+  const [editForm, setEditForm] = useState<TimeSlot | null>(null);
+
+  // Pilot Details State
+  const [selectedPilot, setSelectedPilot] = useState<PilotProfile | null>(null);
 
   useEffect(() => {
     const savedData = localStorage.getItem('kart_circuit_data');
@@ -66,16 +79,15 @@ export default function AdminView({
   };
 
   const handleUpdateSlotClick = (slot: TimeSlot) => {
-    const newPrice = prompt('Novo preço da sessão:', slot.price.toString());
-    const newTotal = prompt('Novo número total de karts:', slot.totalKarts.toString());
-    
-    if (newPrice && newTotal) {
-      onUpdateSlot({
-        ...slot,
-        price: parseFloat(newPrice),
-        totalKarts: parseInt(newTotal, 10),
-        availableKarts: parseInt(newTotal, 10) - (slot.totalKarts - slot.availableKarts)
-      });
+    setEditingSlot(slot);
+    setEditForm({ ...slot });
+  };
+
+  const handleSaveSlot = () => {
+    if (editForm) {
+      onUpdateSlot(editForm);
+      setEditingSlot(null);
+      setEditForm(null);
     }
   };
 
@@ -167,20 +179,33 @@ export default function AdminView({
             </thead>
             <tbody>
               {registeredPilots?.map((p, i) => (
-                <tr key={i} className="border-b border-brand-border/40 hover:bg-brand-surface-high/30 transition-colors">
-                  <td className="p-4">
+                <tr 
+                  key={i} 
+                  onClick={() => setSelectedPilot(p)}
+                  className="border-b border-brand-border/40 hover:bg-brand-surface-high/30 transition-colors cursor-pointer group"
+                >
+                  <td className="p-4 text-white">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center text-white font-black text-xs">
+                      <div className="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center text-white font-black text-xs group-hover:scale-110 transition-transform">
                         {p.name.charAt(0)}
                       </div>
-                      <span className="font-bold text-white">{p.name} <br/><span className="text-[10px] text-brand-text-muted uppercase tracking-wider">{p.nickname}</span></span>
+                      <span className="font-bold">{p.name} <br/><span className="text-[10px] text-brand-text-muted uppercase tracking-wider">{p.nickname}</span></span>
                     </div>
                   </td>
-                  <td className="p-4 text-emerald-500 font-mono">{p.whatsapp || p.phone || '-'}</td>
+                  <td className="p-4 text-emerald-500 font-mono italic">{p.whatsapp || p.phone || '-'}</td>
                   <td className="p-4">{p.cpf || p.documentNumber || '-'}</td>
                   <td className="p-4 font-mono">{p.dob ? new Date(p.dob+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
-                  <td className="p-4 font-black text-brand-red">{p.bloodType || '-'}</td>
-                  <td className="p-4 font-display text-2xl text-white">{p.totalRaces}</td>
+                  <td className="p-4 font-black">
+                    <span className={p.bloodType ? "text-brand-red" : "text-gray-700"}>{p.bloodType || 'N/A'}</span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display text-2xl text-white">{p.totalRaces}</span>
+                      {bookings.some(b => b.pilotName === p.name) && (
+                        <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse" title="Vaga Reservada"></span>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {(!registeredPilots || registeredPilots.length === 0) && (
@@ -311,6 +336,294 @@ export default function AdminView({
           </div>
         </div>
       )}
+
+      {/* Modern Slot Edit Modal */}
+      <AnimatePresence>
+        {editingSlot && editForm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setEditingSlot(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-[#121214] border border-brand-border rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="bg-brand-surface p-6 border-b border-brand-border flex justify-between items-center">
+                <div>
+                  <h3 className="font-display text-xl italic uppercase text-white flex items-center gap-2">
+                    <Edit className="w-5 h-5 text-brand-red" />
+                    Configurar Bateria
+                  </h3>
+                  <p className="text-[10px] text-brand-text-muted uppercase tracking-widest mt-1">ID da Sessão: {editingSlot.id}</p>
+                </div>
+                <button 
+                  onClick={() => setEditingSlot(null)}
+                  className="p-2 hover:bg-white/5 rounded-full transition-colors text-brand-text-muted hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-8 space-y-6">
+                {/* Time & Category Row */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest flex items-center gap-1.5">
+                      <Clock className="w-3 h-3 text-brand-red" /> Horário
+                    </label>
+                    <input 
+                      type="text" 
+                      value={editForm.time}
+                      onChange={(e) => setEditForm({...editForm, time: e.target.value})}
+                      className="w-full bg-black border border-brand-border rounded-lg p-3 text-sm focus:outline-none focus:border-brand-red transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest flex items-center gap-1.5">
+                      <Gamepad2 className="w-3 h-3 text-brand-red" /> Categoria
+                    </label>
+                    <select
+                      value={editForm.type || 'Standard'}
+                      onChange={(e) => setEditForm({...editForm, type: e.target.value as any})}
+                      className="w-full bg-black border border-brand-border rounded-lg p-3 text-sm focus:outline-none focus:border-brand-red transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="Standard">Standard</option>
+                      <option value="Fast Track">Fast Track</option>
+                      <option value="Night Run">Night Run</option>
+                      <option value="Pro Academy">Pro Academy</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Price & Karts Row */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest flex items-center gap-1.5">
+                      <DollarSign className="w-3 h-3 text-emerald-500" /> Preço (R$)
+                    </label>
+                    <input 
+                      type="number" 
+                      value={editForm.price}
+                      onChange={(e) => setEditForm({...editForm, price: parseFloat(e.target.value) || 0})}
+                      className="w-full bg-black border border-brand-border rounded-lg p-3 text-sm font-mono focus:outline-none focus:border-emerald-500 transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest flex items-center gap-1.5">
+                      <Plus className="w-3 h-3 text-brand-red" /> Total Karts
+                    </label>
+                    <input 
+                      type="number" 
+                      value={editForm.totalKarts}
+                      onChange={(e) => {
+                        const total = parseInt(e.target.value) || 0;
+                        const diff = total - editForm.totalKarts;
+                        setEditForm({
+                          ...editForm, 
+                          totalKarts: total,
+                          availableKarts: Math.max(0, editForm.availableKarts + diff)
+                        });
+                      }}
+                      className="w-full bg-black border border-brand-border rounded-lg p-3 text-sm focus:outline-none focus:border-brand-red transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-brand-red/5 border border-brand-red/10 p-4 rounded-xl">
+                  <p className="text-[11px] text-brand-text-muted leading-relaxed">
+                    <strong className="text-white uppercase">Status da Disponibilidade:</strong> Atualmente existem <span className="text-white font-bold">{editForm.availableKarts}</span> karts livres para reserva nesta sessão de {editForm.time}.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 bg-brand-surface border-t border-brand-border flex gap-3">
+                <button 
+                  onClick={() => setEditingSlot(null)}
+                  className="flex-1 py-3 px-4 rounded-lg border border-brand-border hover:bg-white/5 transition-all text-xs font-black uppercase tracking-widest"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleSaveSlot}
+                  className="flex-[2] py-3 px-4 rounded-lg bg-brand-red hover:bg-[#ff1e27] text-white transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                >
+                  <Save className="w-4 h-4" /> Atualizar Bateria
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modern Pilot Details Modal */}
+      <AnimatePresence>
+        {selectedPilot && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedPilot(null)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              className="relative w-full max-w-2xl bg-[#0e0e10] border border-brand-border rounded-3xl shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden"
+            >
+              {/* Header with Background Pattern */}
+              <div className="relative h-32 bg-brand-red overflow-hidden">
+                <div className="absolute inset-0 opacity-20 carbon-texture" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <button 
+                  onClick={() => setSelectedPilot(null)}
+                  className="absolute top-6 right-6 p-2 bg-black/40 hover:bg-black/60 rounded-full transition-all text-white z-10"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Pilot Profile Info */}
+              <div className="px-8 pb-8">
+                <div className="relative -mt-16 mb-6 flex items-end gap-6">
+                  <div className="w-32 h-32 rounded-2xl bg-[#121214] border-4 border-[#0e0e10] overflow-hidden shadow-xl">
+                    <img 
+                      src={selectedPilot.avatar || "https://cdn-icons-png.flaticon.com/512/219/219983.png"} 
+                      alt={selectedPilot.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="pb-2">
+                    <h3 className="font-display text-4xl italic uppercase text-white tracking-tighter leading-none">
+                      {selectedPilot.name}
+                    </h3>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-brand-red font-black uppercase text-xs tracking-widest bg-brand-red/10 px-2 py-0.5 rounded border border-brand-red/20">
+                        {selectedPilot.nickname}
+                      </span>
+                      <span className="text-brand-text-muted font-bold text-[10px] uppercase tracking-[0.2em]">
+                        {selectedPilot.category} • {selectedPilot.experienceLevel}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Left Column: Stats */}
+                  <div className="space-y-4 md:col-span-1">
+                    <div className="bg-brand-surface p-4 rounded-2xl border border-brand-border">
+                      <p className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest mb-3">Estatísticas de Pista</p>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-end">
+                          <span className="text-xs text-gray-500 font-bold uppercase">Corridas</span>
+                          <span className="font-display text-3xl text-white italic">{selectedPilot.totalRaces}</span>
+                        </div>
+                        <div className="flex justify-between items-end">
+                          <span className="text-xs text-gray-500 font-bold uppercase">Melhor Volta</span>
+                          <span className="font-mono text-lg text-emerald-500 font-black">{selectedPilot.bestLap || '--:---'}</span>
+                        </div>
+                        <div className="flex justify-between items-end border-t border-white/5 pt-3">
+                          <span className="text-xs text-brand-red font-black uppercase italic">Streak Ativo</span>
+                          <span className="font-display text-2xl text-white">{selectedPilot.activeStreak}🔥</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-brand-red/5 p-4 rounded-2xl border border-brand-red/10">
+                      <p className="text-[10px] font-black text-brand-red uppercase tracking-widest mb-2">Dados Médicos</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-brand-red flex items-center justify-center text-white font-black text-lg">
+                          {selectedPilot.bloodType || '?'}
+                        </div>
+                        <span className="text-xs text-brand-text-muted font-bold uppercase tracking-tight">Tipo Sanguíneo para Emergências</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Contact & Bookings */}
+                  <div className="md:col-span-2 space-y-6">
+                    <div className="bg-brand-surface p-6 rounded-2xl border border-brand-border h-fit">
+                      <p className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest mb-4">Informações de Contato & Documento</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-extrabold text-gray-600 uppercase">WhatsApp / Celular</label>
+                          <p className="text-emerald-500 font-mono font-bold text-sm flex items-center gap-2">
+                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                             {selectedPilot.whatsapp || selectedPilot.phone || 'Não informado'}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-extrabold text-gray-600 uppercase">E-mail</label>
+                          <p className="text-white text-sm font-semibold truncate">{selectedPilot.email}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-extrabold text-gray-600 uppercase">Documento ({selectedPilot.documentType || 'CPF'})</label>
+                          <p className="text-white font-mono text-sm">{selectedPilot.cpf || selectedPilot.documentNumber || 'Não informado'}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-extrabold text-gray-600 uppercase">Data de Nascimento</label>
+                          <p className="text-white text-sm font-semibold">
+                            {selectedPilot.dob ? new Date(selectedPilot.dob+'T00:00:00').toLocaleDateString('pt-BR') : 'Não informada'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-black/40 p-6 rounded-2xl border border-brand-border">
+                      <div className="flex justify-between items-center mb-4">
+                        <p className="text-[10px] font-black text-white uppercase tracking-widest">Estado de Reservas</p>
+                        {bookings.some(b => b.pilotName === selectedPilot.name) ? (
+                          <span className="text-[9px] font-black bg-brand-red text-white px-2 py-0.5 rounded italic animate-pulse">AGENDAMENTO ATIVO</span>
+                        ) : (
+                          <span className="text-[9px] font-black bg-gray-800 text-gray-400 px-2 py-0.5 rounded italic">SEM AGENDAMENTOS</span>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {bookings
+                          .filter(b => b.pilotName === selectedPilot.name)
+                          .map((b, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-brand-surface-high/50 rounded-xl border border-white/5">
+                              <div>
+                                <p className="text-white font-bold text-xs">{b.date} • {b.time}</p>
+                                <p className="text-[9px] text-brand-text-muted uppercase tracking-wider">{b.category} • {b.karts} Pilotos</p>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[10px] text-brand-red font-black block">R$ {b.price.toFixed(2)}</span>
+                                <span className="text-[8px] text-emerald-500 font-bold uppercase">{b.status}</span>
+                              </div>
+                            </div>
+                          ))}
+                        {!bookings.some(b => b.pilotName === selectedPilot.name) && (
+                          <p className="text-xs text-gray-600 italic py-2">Nenhuma corrida pendente no sistema para este piloto.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6 bg-brand-surface border-t border-brand-border flex justify-end">
+                <button 
+                  onClick={() => setSelectedPilot(null)}
+                  className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                >
+                  Fechar Perfil
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
