@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { generateDateOptions } from '../../utils/dateUtils';
 
 export default function BookingWidget() {
-  const { handleQuickBook, circuitCurves } = useApp();
+  const { handleQuickBook } = useApp();
   const [pilotName, setPilotName] = useState('');
   const [dateOptions] = useState(generateDateOptions());
   const [selectedDate, setSelectedDate] = useState(dateOptions[0]);
@@ -31,6 +31,8 @@ export default function BookingWidget() {
   const handleBookSubmit = () => {
     handleQuickBook(selectedDate, pilotsCount, selectedCategory, pilotName);
   };
+
+  const circuitData = JSON.parse(localStorage.getItem('kart_circuit_data') || '{}');
 
   return (
     <section className="py-24 px-6 md:px-10 max-w-[1200px] mx-auto" id="booking-section">
@@ -138,9 +140,7 @@ export default function BookingWidget() {
         </div>
 
         <div className="md:col-span-5 flex flex-col gap-6">
-          {/* Live Circuit Mini-Map */}
           <div className="bg-[#0b0e14] border border-brand-border rounded-xl overflow-hidden shadow-2xl flex flex-col">
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-brand-border/50">
               <div className="flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-brand-red animate-ping"></span>
@@ -149,49 +149,18 @@ export default function BookingWidget() {
               <span className="text-[9px] font-black text-brand-red uppercase tracking-[0.2em]">Circuit_Map_v1.2</span>
             </div>
 
-            {/* Map Area */}
             <div className="relative aspect-square w-full bg-[#080a0e] overflow-hidden flex items-center justify-center">
-              {/* Grid background */}
-              <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+              <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
 
-              {/* Circuit image / Blueprint */}
               <img
-                src={JSON.parse(localStorage.getItem('kart_circuit_data') || '{}').blueprintImage || "https://files.catbox.moe/rbtosq.png"}
+                src={circuitData.blueprintImage || "https://files.catbox.moe/rbtosq.png"}
                 alt="Traçado"
-                className="w-[88%] h-[88%] object-contain opacity-40 brightness-150 contrast-125 saturate-0"
+                className="w-[92%] h-[92%] object-contain transition-all duration-500"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).style.opacity = '0';
                 }}
               />
 
-              {/* Curve / Tyre markers */}
-              {circuitCurves.map((curve) => (
-                <div
-                  key={curve.id}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 group/pt z-10"
-                  style={{ left: `${curve.x}%`, top: `${curve.y}%` }}
-                >
-                  <div className="relative w-5 h-5 flex items-center justify-center transition-all group-hover/pt:scale-150">
-                    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_8px_rgba(0,0,0,0.9)]">
-                      <circle cx="50" cy="50" r="45" fill="#141416" stroke="#2a2a2e" strokeWidth="8" />
-                      <circle cx="50" cy="50" r="30" fill="none"
-                        stroke={curve.type === 'Alta' ? '#ef4444' : curve.type === 'Média' ? '#f97316' : '#06b6d4'}
-                        strokeWidth="7"
-                      />
-                      <circle cx="50" cy="50" r="16" fill="#080808" />
-                    </svg>
-                    <div className={`absolute inset-0 rounded-full blur-md opacity-0 group-hover/pt:opacity-50 transition-opacity ${
-                      curve.type === 'Alta' ? 'bg-red-500' : curve.type === 'Média' ? 'bg-orange-500' : 'bg-cyan-500'
-                    }`}></div>
-                  </div>
-                  {/* Tooltip */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md px-2 py-0.5 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover/pt:opacity-100 transition-all pointer-events-none text-[8px] font-black text-white uppercase z-50">
-                    {curve.name}
-                  </div>
-                </div>
-              ))}
-
-              {/* Kart Grid Markers */}
               {[
                 { id: 'k1', number: 1, pilot: 'Erisson Jr.',  x: 46, y: 13, color: '#ef4444' },
                 { id: 'k2', number: 2, pilot: 'Sarah Shift',  x: 49, y: 13, color: '#f97316' },
@@ -210,38 +179,22 @@ export default function BookingWidget() {
                   >
                     {kart.number}
                   </div>
-                  {/* Kart Tooltip */}
-                  <div className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md px-2 py-0.5 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover/kart:opacity-100 transition-all pointer-events-none text-[8px] font-black uppercase z-50"
-                    style={{ color: kart.color }}
-                  >
-                    #{kart.number} {kart.pilot}
-                  </div>
                 </div>
               ))}
 
-              {/* HUD Corner label */}
               <div className="absolute top-3 left-3 pointer-events-none">
-                <span className="text-[8px] font-black text-brand-red/60 uppercase tracking-[0.25em]">Sectors: {circuitCurves.length}</span>
-              </div>
-              <div className="absolute top-3 right-3 pointer-events-none">
-                <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.25em]">Karts: 5</span>
+                <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.25em]">LIVE TRACK VIEW</span>
               </div>
             </div>
 
-            {/* Legend Row */}
-            <div className="px-5 py-3 border-t border-brand-border/50 flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-wider text-brand-text-muted">
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full border-2 border-red-500 bg-black inline-block"></span>Alta</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full border-2 border-orange-500 bg-black inline-block"></span>Média</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full border-2 border-cyan-500 bg-black inline-block"></span>Baixa</span>
-              </div>
+            <div className="px-5 py-3 border-t border-brand-border/50 flex items-center justify-end">
               <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-brand-text-muted">
-                <span className="w-3 h-3 rounded-sm bg-brand-red inline-block"></span>Kart
+                <span className="w-3 h-3 rounded-sm bg-brand-red inline-block"></span>
+                <span className="ml-1">Kart Ativo</span>
               </div>
             </div>
           </div>
 
-          {/* Bottom info row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-black/40 border border-brand-border p-4 rounded-xl flex flex-col justify-center items-center text-center relative overflow-hidden backdrop-blur-sm">
               <div className="absolute top-2 left-2 flex items-center gap-1.5">
