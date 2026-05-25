@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { Booking, TimeSlot, PilotProfile } from '../types';
 import { 
+  Users, 
+  Timer, 
+  Calendar, 
+  X, 
+  Edit, 
+  Trash2, 
   Camera, 
   Save, 
-  Trash2, 
   Upload, 
   Layout, 
   Map, 
@@ -11,6 +17,14 @@ import {
   Plus
 } from 'lucide-react';
 
+interface AdminViewProps {
+  bookings: Booking[];
+  slots: TimeSlot[];
+  registeredPilots: PilotProfile[];
+  onCancelBooking: (id: string) => void;
+  onUpdateSlot: (slot: TimeSlot) => void;
+}
+
 interface CircuitData {
   circuitPath: string;
   blueprintImage?: string;
@@ -18,7 +32,16 @@ interface CircuitData {
   suggestion: string;
 }
 
-const AdminView: React.FC = () => {
+export default function AdminView({ 
+  bookings, 
+  slots, 
+  registeredPilots,
+  onCancelBooking,
+  onUpdateSlot
+}: AdminViewProps) {
+  const [activeTab, setActiveTab] = useState<'pilots' | 'bookings' | 'slots' | 'circuit'>('pilots');
+  
+  // Circuit State (Nano Banana)
   const [circuitData, setCircuitData] = useState<CircuitData>({
     circuitPath: '',
     blueprintImage: '',
@@ -36,6 +59,27 @@ const AdminView: React.FC = () => {
     }
   }, []);
 
+  const handleDeleteBooking = (id: string) => {
+    if (confirm('Tem certeza que deseja cancelar essa reserva?')) {
+      onCancelBooking(id);
+    }
+  };
+
+  const handleUpdateSlotClick = (slot: TimeSlot) => {
+    const newPrice = prompt('Novo preço da sessão:', slot.price.toString());
+    const newTotal = prompt('Novo número total de karts:', slot.totalKarts.toString());
+    
+    if (newPrice && newTotal) {
+      onUpdateSlot({
+        ...slot,
+        price: parseFloat(newPrice),
+        totalKarts: parseInt(newTotal, 10),
+        availableKarts: parseInt(newTotal, 10) - (slot.totalKarts - slot.availableKarts)
+      });
+    }
+  };
+
+  // Circuit Handlers
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -48,183 +92,215 @@ const AdminView: React.FC = () => {
   };
 
   const handleSaveBlueprint = () => {
-    if (!blueprintImage && !circuitData.description && !circuitData.suggestion) {
-      alert('Preencha os dados da planta antes de salvar.');
-      return;
-    }
-    
     const updatedCircuit = {
       ...circuitData,
       blueprintImage: blueprintImage || '',
-      circuitPath: '' // Prioriza imagem manual
+      circuitPath: ''
     };
-    
     localStorage.setItem('kart_circuit_data', JSON.stringify(updatedCircuit));
     setCircuitData(updatedCircuit);
-    alert('Planta oficial e análises salvas com sucesso!');
-  };
-
-  const handleResetBlueprint = () => {
-    if (confirm('Deseja resetar a planta atual?')) {
-      const resetData = {
-        circuitPath: '',
-        blueprintImage: '',
-        description: 'Circuito padrão carregado.',
-        suggestion: 'Prepare sua estratégia para este desafio!'
-      };
-      localStorage.setItem('kart_circuit_data', JSON.stringify(resetData));
-      setCircuitData(resetData);
-      setBlueprintImage(null);
-    }
+    alert('Planta do circuito salva com sucesso!');
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-white p-4 md:p-8 pt-24 font-sans">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-border/20 pb-8">
-          <div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">
-              Portal <span className="text-brand-red underline decoration-brand-red/30 underline-offset-8">Admin</span>
-            </h1>
-            <p className="text-gray-500 mt-2 font-mono text-sm uppercase tracking-widest">Controle de Circuito & Pista</p>
-          </div>
-          <div className="flex gap-3">
-            <button 
-              onClick={handleSaveBlueprint}
-              className="px-6 py-3 bg-brand-red text-white font-bold rounded-lg flex items-center gap-2 hover:bg-red-700 transition-all shadow-[0_0_20px_rgba(255,51,51,0.2)] active:scale-95"
-            >
-              <Save className="w-5 h-5" />
-              <span>Salvar Alterações</span>
-            </button>
-            <button 
-              onClick={handleResetBlueprint}
-              className="px-4 py-3 bg-white/5 text-gray-400 font-bold rounded-lg hover:bg-white/10 transition-all border border-white/10"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+    <div className="w-full">
+      <div className="mb-10">
+        <h2 className="font-display text-4xl italic uppercase text-brand-red tracking-tight flex items-center gap-3">
+          PAINEL DE ADMINISTRAÇÃO
+        </h2>
+        <p className="font-sans text-brand-text-muted mt-2 uppercase tracking-widest text-[10px] font-bold">
+          Gestão de Pilotos, Reservas e Pista Técnica
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Upload Column */}
+      <div className="flex border-b border-brand-border mb-8 overflow-x-auto custom-scrollbar">
+        <button
+          onClick={() => setActiveTab('pilots')}
+          className={`px-6 py-4 font-sans text-xs font-black tracking-widest uppercase flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'pilots' ? 'text-brand-red border-brand-red' : 'text-brand-text-muted border-transparent hover:text-white'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          Clientes
+        </button>
+        <button
+          onClick={() => setActiveTab('bookings')}
+          className={`px-6 py-4 font-sans text-xs font-black tracking-widest uppercase flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'bookings' ? 'text-brand-red border-brand-red' : 'text-brand-text-muted border-transparent hover:text-white'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          Reservas
+        </button>
+        <button
+          onClick={() => setActiveTab('slots')}
+          className={`px-6 py-4 font-sans text-xs font-black tracking-widest uppercase flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'slots' ? 'text-brand-red border-brand-red' : 'text-brand-text-muted border-transparent hover:text-white'
+          }`}
+        >
+          <Timer className="w-4 h-4" />
+          Baterias
+        </button>
+        <button
+          onClick={() => setActiveTab('circuit')}
+          className={`px-6 py-4 font-sans text-xs font-black tracking-widest uppercase flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'circuit' ? 'text-brand-red border-brand-red' : 'text-brand-text-muted border-transparent hover:text-white'
+          }`}
+        >
+          <Map className="w-4 h-4" />
+          Nano Banana IA
+        </button>
+      </div>
+
+      {activeTab === 'pilots' && (
+        <div className="bg-[#121214] border border-brand-border rounded-lg overflow-x-auto shadow-2xl">
+          <table className="w-full text-left font-sans text-sm border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-brand-surface border-b border-brand-border uppercase text-[10px] tracking-widest font-black text-brand-text-muted">
+                <th className="p-4">Piloto</th>
+                <th className="p-4">WhatsApp</th>
+                <th className="p-4">Documento</th>
+                <th className="p-4">Nascimento</th>
+                <th className="p-4">Sangue</th>
+                <th className="p-4">Corridas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {registeredPilots.map((p, i) => (
+                <tr key={i} className="border-b border-brand-border/40 hover:bg-brand-surface-high/30 transition-colors">
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center text-white font-black text-xs">
+                        {p.name.charAt(0)}
+                      </div>
+                      <span className="font-bold text-white">{p.name} <br/><span className="text-[10px] text-brand-text-muted uppercase tracking-wider">{p.nickname}</span></span>
+                    </div>
+                  </td>
+                  <td className="p-4 text-emerald-500 font-mono">{p.whatsapp || p.phone || '-'}</td>
+                  <td className="p-4">{p.cpf || p.documentNumber || '-'}</td>
+                  <td className="p-4 font-mono">{p.dob ? new Date(p.dob+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+                  <td className="p-4 font-black text-brand-red">{p.bloodType || '-'}</td>
+                  <td className="p-4 font-display text-2xl text-white">{p.totalRaces}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === 'bookings' && (
+        <div className="bg-[#121214] border border-brand-border rounded-lg overflow-x-auto shadow-2xl">
+          <table className="w-full text-left font-sans text-sm border-collapse min-w-[700px]">
+            <thead>
+              <tr className="bg-brand-surface border-b border-brand-border uppercase text-[10px] tracking-widest font-black text-brand-text-muted">
+                <th className="p-4">Data / Hora</th>
+                <th className="p-4">Líder do Grupo</th>
+                <th className="p-4">Categoria</th>
+                <th className="p-4 text-right">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((b) => (
+                <tr key={b.id} className="border-b border-brand-border/40 hover:bg-brand-surface-high/30 transition-colors">
+                  <td className="p-4 font-bold text-white">{b.date} • {b.time}</td>
+                  <td className="p-4 inline-flex items-center gap-2"><Users className="w-3 h-3 text-brand-red"/>{b.pilotName}</td>
+                  <td className="p-4 uppercase text-[10px] font-black tracking-widest">{b.category}</td>
+                  <td className="p-4 text-right">
+                    <button onClick={() => handleDeleteBooking(b.id)} className="text-brand-red hover:bg-brand-red hover:text-white p-2 rounded transition-all">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === 'slots' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {slots.map((slot) => (
+            <div key={slot.id} className="bg-[#121214] border border-brand-border p-6 rounded-lg shadow-xl hover:border-brand-red/30 transition-all">
+              <span className="text-[10px] font-black tracking-[0.2em] uppercase text-brand-red">{slot.type}</span>
+              <h3 className="font-display text-4xl text-white italic mt-2">{slot.time}</h3>
+              <div className="mt-6 flex justify-between items-center text-sm border-t border-white/5 pt-4">
+                <span className="text-emerald-500 font-black tracking-widest">R$ {slot.price.toFixed(2)}</span>
+                <span className="text-gray-500">{slot.availableKarts} / {slot.totalKarts} livres</span>
+              </div>
+              <button onClick={() => handleUpdateSlotClick(slot)} className="mt-6 w-full py-3 bg-white/5 border border-white/10 hover:bg-brand-red hover:border-brand-red transition-all rounded text-[10px] font-black uppercase tracking-widest">
+                Editar Sessão
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'circuit' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#121214] border border-brand-border/20 rounded-2xl overflow-hidden p-6 shadow-2xl">
-              <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <div className="p-2 bg-brand-red/10 rounded-lg">
+            <div className="bg-[#121214] border border-brand-border rounded-xl p-6 shadow-2xl">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold uppercase italic flex items-center gap-2">
                   <Layout className="w-5 h-5 text-brand-red" />
-                </div>
-                <h2 className="text-xl font-bold uppercase italic">Planta Oficial do Circuito</h2>
+                  Planta da Pista
+                </h3>
+                <button onClick={handleSaveBlueprint} className="px-4 py-2 bg-brand-red rounded text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                  <Save className="w-4 h-4" /> Salvar Planta
+                </button>
               </div>
               
-              <div className="relative aspect-video rounded-xl bg-[#0a0a0b] border-2 border-dashed border-white/10 group overflow-hidden">
+              <div className="relative aspect-video rounded-lg bg-black border-2 border-dashed border-white/10 overflow-hidden">
                 {blueprintImage ? (
-                  <div className="relative w-full h-full p-4">
+                  <div className="relative w-full h-full">
                     <div className="absolute inset-0 bg-[#f2e8cf]/90" />
-                    <div className="absolute inset-0" style={{ 
-                      backgroundImage: 'radial-gradient(#2b2d42 0.5px, transparent 0.5px)', 
-                      backgroundSize: '20px 20px',
-                      opacity: 0.2
-                    }} />
-                    <img 
-                      src={blueprintImage} 
-                      alt="Preview da Planta"
-                      className="relative w-full h-full object-contain filter contrast-125 saturate-0 mix-blend-multiply opacity-90"
-                    />
-                    <div className="absolute top-4 right-4 flex gap-2">
-                       <label className="p-3 bg-white/10 backdrop-blur-md rounded-lg cursor-pointer hover:bg-white/20 transition-all border border-white/20">
-                        <Plus className="w-5 h-5" />
-                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                      </label>
-                    </div>
+                    <img src={blueprintImage} className="w-full h-full object-contain mix-blend-multiply opacity-90 p-4" />
+                    <label className="absolute top-4 right-4 p-2 bg-black/60 rounded-full cursor-pointer hover:bg-brand-red transition-all">
+                      <Plus className="w-4 h-4" />
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                    </label>
                   </div>
                 ) : (
-                  <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all">
-                    <div className="p-4 bg-brand-red/10 rounded-full mb-4 group-hover:scale-110 transition-transform">
-                      <Upload className="w-8 h-8 text-brand-red" />
-                    </div>
-                    <span className="text-lg font-bold text-gray-400 italic">CARREGAR PLANTA BAIXA</span>
-                    <span className="text-sm text-gray-600 mt-2">Escolha o arquivo gerado no Gemini</span>
+                  <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5">
+                    <Upload className="w-8 h-8 text-brand-red mb-3" />
+                    <span className="font-black text-[10px] tracking-widest uppercase">Subir Planta Técnica</span>
                     <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                   </label>
                 )}
               </div>
             </div>
 
-            {/* Info Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-[#121214] p-6 rounded-2xl border-l-4 border-brand-red shadow-lg">
-                <div className="flex items-center gap-3 mb-4">
-                  <Info className="w-5 h-5 text-brand-red" />
-                  <h3 className="font-bold uppercase tracking-widest text-sm">Análise Técnica</h3>
-                </div>
+              <div className="bg-[#121214] p-5 rounded-xl border border-white/5">
+                <h4 className="text-[10px] font-black uppercase text-brand-red mb-3 tracking-widest">Análise do Arquiteto</h4>
                 <textarea 
                   value={circuitData.description}
                   onChange={(e) => setCircuitData({...circuitData, description: e.target.value})}
-                  className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-gray-400 font-mono text-sm h-32 focus:border-brand-red focus:ring-0 transition-all"
-                  placeholder="Descreva as características técnicas do traçado..."
+                  className="w-full bg-black/40 border border-white/10 rounded p-3 text-sm text-gray-400 h-32 outline-none focus:border-brand-red transition-all"
+                  placeholder="Ex: Pista técnica com zebras baixas..."
                 />
               </div>
-
-              <div className="bg-[#121214] p-6 rounded-2xl border-l-4 border-emerald-500 shadow-lg">
-                <div className="flex items-center gap-3 mb-4">
-                  <ChevronRight className="w-5 h-5 text-emerald-500" />
-                  <h3 className="font-bold uppercase tracking-widest text-sm">Dica de Performance</h3>
-                </div>
+              <div className="bg-[#121214] p-5 rounded-xl border border-white/5">
+                <h4 className="text-[10px] font-black uppercase text-emerald-500 mb-3 tracking-widest">Dica Pro</h4>
                 <textarea 
                   value={circuitData.suggestion}
                   onChange={(e) => setCircuitData({...circuitData, suggestion: e.target.value})}
-                  className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-gray-400 font-mono text-sm h-32 focus:border-emerald-500 focus:ring-0 transition-all"
-                  placeholder="Dê uma dica crucial para os pilotos..."
+                  className="w-full bg-black/40 border border-white/10 rounded p-3 text-sm text-gray-400 h-32 outline-none focus:border-emerald-500 transition-all"
+                  placeholder="Ex: Mantenha o traçado aberto na curva 4..."
                 />
               </div>
             </div>
           </div>
 
-          {/* Sidebar Tips */}
-          <div className="space-y-6">
-            <div className="bg-brand-red/10 border border-brand-red/20 p-6 rounded-2xl">
-              <h3 className="text-brand-red font-black italic uppercase mb-4 flex items-center gap-2">
-                <Camera className="w-5 h-5" />
-                Dica Nano Banana
-              </h3>
-              <ul className="text-sm text-gray-400 space-y-4">
-                <li className="flex gap-3">
-                  <span className="text-brand-red font-bold">01.</span>
-                  <span>Use o Gemini Web para converter a foto aérea em uma "planta baixa técnica".</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-brand-red font-bold">02.</span>
-                  <span>Salve a imagem gerada e faça o upload aqui.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-brand-red font-bold">03.</span>
-                  <span>O sistema aplicará automaticamente o visual de blueprint do site.</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-[#121214] p-6 rounded-2xl border border-white/5">
-              <h3 className="text-white font-bold uppercase tracking-tighter mb-4 flex items-center gap-2">
-                <Map className="w-5 h-5" />
-                Resumo do Circuito
-              </h3>
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm py-2 border-b border-white/5">
-                  <span className="text-gray-500">Status</span>
-                  <span className="text-emerald-500 font-bold uppercase tracking-widest text-xs">Ativo</span>
-                </div>
-                <div className="flex justify-between text-sm py-2 border-b border-white/5">
-                  <span className="text-gray-500">Tipo</span>
-                  <span className="text-gray-300 italic">Pista Técnica</span>
-                </div>
-              </div>
-            </div>
+          <div className="bg-brand-red/5 border border-brand-red/10 p-6 rounded-xl h-fit">
+            <h3 className="font-black italic uppercase text-brand-red mb-4">Instruções</h3>
+            <ul className="text-xs text-gray-500 space-y-4 font-sans leading-relaxed">
+              <li>1. Gere a planta no <strong className="text-white">Gemini Web</strong> usando a foto aérea.</li>
+              <li>2. Faça o upload da imagem limpa que o Gemini retornar.</li>
+              <li>3. Salve para atualizar a Home do site instantaneamente.</li>
+            </ul>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
-};
-
-export default AdminView;
+}
