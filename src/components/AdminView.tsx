@@ -166,7 +166,7 @@ export default function AdminView({
               </tr>
             </thead>
             <tbody>
-              {registeredPilots.map((p, i) => (
+              {registeredPilots?.map((p, i) => (
                 <tr key={i} className="border-b border-brand-border/40 hover:bg-brand-surface-high/30 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
@@ -183,6 +183,11 @@ export default function AdminView({
                   <td className="p-4 font-display text-2xl text-white">{p.totalRaces}</td>
                 </tr>
               ))}
+              {(!registeredPilots || registeredPilots.length === 0) && (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-gray-500 italic uppercase text-[10px] tracking-widest font-bold">Nenhum piloto registrado</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -200,7 +205,7 @@ export default function AdminView({
               </tr>
             </thead>
             <tbody>
-              {bookings.map((b) => (
+              {bookings?.map((b) => (
                 <tr key={b.id} className="border-b border-brand-border/40 hover:bg-brand-surface-high/30 transition-colors">
                   <td className="p-4 font-bold text-white">{b.date} • {b.time}</td>
                   <td className="p-4 inline-flex items-center gap-2"><Users className="w-3 h-3 text-brand-red"/>{b.pilotName}</td>
@@ -212,6 +217,11 @@ export default function AdminView({
                   </td>
                 </tr>
               ))}
+              {(!bookings || bookings.length === 0) && (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-gray-500 italic uppercase text-[10px] tracking-widest font-bold">Nenhum agendamento ativo</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -219,7 +229,7 @@ export default function AdminView({
 
       {activeTab === 'slots' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {slots.map((slot) => (
+          {slots?.map((slot) => (
             <div key={slot.id} className="bg-[#121214] border border-brand-border p-6 rounded-lg shadow-xl hover:border-brand-red/30 transition-all">
               <span className="text-[10px] font-black tracking-[0.2em] uppercase text-brand-red">{slot.type}</span>
               <h3 className="font-display text-4xl text-white italic mt-2">{slot.time}</h3>

@@ -249,7 +249,13 @@ export default function App() {
             )}
             {activeTab === 'admin' && isLoggedIn && profile.role === 'admin' && (
               <div className="py-12 px-6 md:px-10 max-w-[1200px] mx-auto">
-                <AdminView />
+                <AdminView 
+                  bookings={bookings}
+                  slots={slots}
+                  registeredPilots={registeredPilots}
+                  onCancelBooking={handleCancelBooking}
+                  onUpdateSlot={handleUpdateSlot}
+                />
               </div>
             )}
           </motion.div>
