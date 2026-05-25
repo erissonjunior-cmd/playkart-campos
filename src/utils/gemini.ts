@@ -1,63 +1,73 @@
-const API_KEY = "AIzaSyDofT7mrIF2Dr58Sr_boOmVZQ_44RrQTMI";
+// Use environment variable for security - GitHub blocks pushes with hardcoded keys
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
 
 export async function generateTrackBlueprint(base64Image: string) {
   try {
-    const cleanBase64 = base64Image.split(",")[1] || base64Image;
+    if (!GROQ_API_KEY) {
+      throw new Error("A chave VITE_GROQ_API_KEY não foi configurada no ambiente.");
+    }
 
     const prompt = `
-      Você é um CARTOGRAFISTA TÉCNICO de pistas de corrida.
-      Sua tarefa é transformar a imagem aérea de um kartódromo em uma PLANTA BAIXA TÉCNICA PROFISSIONAL.
+      Você é um arquiteto especialista em kartódromos.
+      Analise esta foto aérea e gere uma PLANTA BAIXA TÉCNICA detalhada do traçado da pista.
       
-      REFERÊNCIA DE ESTILO (Siga rigorosamente):
-      1. Desenhe as barreiras de pneus usando círculos pequenos contínuos.
-      2. Desenhe o traçado central e as bordas internas/externas.
-      3. Use um traço preto limpo sobre fundo técnico (estilo blueprint/nanquim).
-      4. Adicione elementos visuais de engenharia (setas de fluxo, indicações de curvas).
-      5. O traçado deve ser geométrica e tecnicamente preciso.
+      ESTILO DO DESENHO (Obrigatório):
+      1. Desenhe as BORDAS (as fileiras de pneus) interna e externa da pista.
+      2. Use um estilo de "sketch técnico" ou "blueprint".
+      3. O traçado deve ser contínuo e representar fielmente as curvas e zebras.
       
-      RETORNE APENAS um objeto JSON:
+      RETORNE APENAS um objeto JSON válido (sem textos extras):
       {
-        "svgPath": "todo o desenho SVG (caminhos, círculos de pneus, setas) condensados no atributo 'd' ou agrupados",
-        "description": "Análise técnica do layout da pista",
-        "suggestion": "Melhor traçado para tempo de volta"
+        "svgPath": "conteúdo do atributo 'd' de um elemento <path> contendo as bordas e detalhes da pista",
+        "description": "Explicação técnica do traçado capturado",
+        "suggestion": "Dica de performance baseada no traçado"
       }
       
       IMPORTANTE:
-      - Foque na estética de 'Desenho Técnico à Mão'.
-      - ViewBox 0 0 100 100.
-      - NÃO adicione texto explicativo fora do JSON.
+      - O svgPath deve conter os caminhos para as bordas da pista.
+      - Assuma ViewBox 0 0 100 100.
+      - NÃO adicione blocos de código Markdown, retorne apenas o JSON puro.
     `;
 
-    // Tentando o modelo experimental que costuma ter quotas diferentes e evitar o 404
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-goog-api-key': API_KEY 
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }]
+        model: "llama-3.2-90b-vision-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              {
+                type: "image_url",
+                image_url: {
+                  url: base64Image.startsWith('data:') ? base64Image : `data:image/jpeg;base64,${base64Image}`
+                }
+              }
+            ]
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 1024,
+        response_format: { type: "json_object" }
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Erro API: ${errorData.error?.message || response.statusText}`);
+      throw new Error(`Erro Groq: ${errorData.error?.message || response.statusText}`);
     }
 
-    const result = await response.json();
-    const responseText = result.candidates[0].content.parts[0].text;
+    const data = await response.json();
+    const result = JSON.parse(data.choices[0].message.content);
     
-    try {
-      const jsonStr = responseText.match(/\{[\s\S]*\}/)?.[0] || responseText;
-      return JSON.parse(jsonStr);
-    } catch (e) {
-      throw new Error("Formato de resposta inválido da IA.");
-    }
+    return result;
   } catch (error: any) {
-    console.error("Gemini Error:", error);
+    console.error("Groq Error:", error);
     throw error;
   }
 }
