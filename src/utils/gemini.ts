@@ -32,7 +32,7 @@ export async function generateTrackBlueprint(base64Image: string) {
         "X-Title": "PlayKart Campos"
       },
       body: JSON.stringify({
-        model: "google/gemini-flash-1.5-exp:free",
+        model: "meta-llama/llama-3.2-90b-vision-instruct",
         messages: [
           {
             role: "user",
