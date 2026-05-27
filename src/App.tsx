@@ -24,6 +24,7 @@ import RankingView from './components/RankingView';
 import ProfileView from './components/ProfileView';
 import AuthView from './components/AuthView';
 import AdminView from './components/AdminView';
+import TrackStatusWidget from './components/TrackStatusWidget';
 
 export default function App() {
   const { 
@@ -223,6 +224,8 @@ export default function App() {
           )}
         </AnimatePresence>
       </nav>
+
+      <TrackStatusWidget />
 
       <main className="flex-grow">
         <AnimatePresence mode="wait">

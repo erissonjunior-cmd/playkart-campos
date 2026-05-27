@@ -9,6 +9,8 @@ import {
   saveToLocalStorage 
 } from '../data';
 
+export type TrackStatus = 'dry' | 'damp' | 'wet' | 'closed';
+
 interface AppContextType {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
@@ -32,6 +34,8 @@ interface AppContextType {
   setCircuitMapImage: (url: string) => void;
   circuitPath: string;
   setCircuitPath: (path: string) => void;
+  trackStatus: TrackStatus;
+  handleUpdateTrackStatus: (status: TrackStatus) => void;
   
   // Actions
   handleNavigate: (tab: ActiveTab) => void;
@@ -69,6 +73,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [circuitPath, setCircuitPath] = useState<string>(() => 
     loadFromLocalStorage<string>('pk_campos_circuit_path', '')
+  );
+
+  const [trackStatus, setTrackStatus] = useState<TrackStatus>(() => 
+    loadFromLocalStorage<TrackStatus>('pk_campos_track_status', 'dry')
   );
 
   // Kart grid positions (static test data for now)
@@ -169,6 +177,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToLocalStorage('pk_campos_circuit_curves', circuitCurves); }, [circuitCurves]);
   useEffect(() => { saveToLocalStorage('pk_campos_circuit_map_image', circuitMapImage); }, [circuitMapImage]);
   useEffect(() => { saveToLocalStorage('pk_campos_circuit_path', circuitPath); }, [circuitPath]);
+  useEffect(() => { saveToLocalStorage('pk_campos_track_status', trackStatus); }, [trackStatus]);
 
   // Ensure master admin is always sync'd in local storage list if missing
   useEffect(() => {
@@ -228,6 +237,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return changed ? newList : prev;
     });
   }, [registeredPilots]);
+
+  const handleUpdateTrackStatus = (status: TrackStatus) => {
+    setTrackStatus(status);
+  };
 
   // Actions
   const handleNavigate = (tab: ActiveTab) => {

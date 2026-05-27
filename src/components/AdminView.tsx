@@ -19,8 +19,14 @@ import {
   Clock,
   DollarSign,
   Gamepad2,
-  Trash
+  Trash,
+  MessageCircle,
+  Sun,
+  Cloud,
+  CloudRain,
+  ShieldAlert
 } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface AdminViewProps {
@@ -45,6 +51,7 @@ export default function AdminView({
   onCancelBooking,
   onUpdateSlot
 }: AdminViewProps) {
+  const { trackStatus, handleUpdateTrackStatus } = useApp();
   const [activeTab, setActiveTab] = useState<'pilots' | 'bookings' | 'slots' | 'circuit'>('pilots');
   
   // Circuit State (Nano Banana)
@@ -235,7 +242,17 @@ export default function AdminView({
                   <td className="p-4 font-bold text-white">{b.date} • {b.time}</td>
                   <td className="p-4 inline-flex items-center gap-2"><Users className="w-3 h-3 text-brand-red"/>{b.pilotName}</td>
                   <td className="p-4 uppercase text-[10px] font-black tracking-widest">{b.category}</td>
-                  <td className="p-4 text-right">
+                  <td className="p-4 text-right flex items-center justify-end gap-2">
+                    <button 
+                      onClick={() => {
+                        const message = `Olá ${b.pilotName}! Sua bateria na Playkart Campos está confirmada para ${b.date} às ${b.time}. Categoria: ${b.category}. Nos vemos na pista! 🏎️💨`;
+                        window.open(`https://wa.me/55${b.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+                      }}
+                      className="text-emerald-500 hover:bg-emerald-500 hover:text-white p-2 rounded transition-all"
+                      title="Enviar Confirmação WhatsApp"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </button>
                     <button onClick={() => handleDeleteBooking(b.id)} className="text-brand-red hover:bg-brand-red hover:text-white p-2 rounded transition-all">
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -273,6 +290,34 @@ export default function AdminView({
       {activeTab === 'circuit' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="lg:col-span-2 space-y-6">
+            <div className="bg-[#121214] border border-brand-border rounded-xl p-6 shadow-2xl mb-8">
+              <h3 className="text-xl font-bold uppercase italic flex items-center gap-2 mb-6">
+                <Sun className="w-5 h-5 text-yellow-500" />
+                Status da Pista (Real-Time)
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  { id: 'dry', label: 'Seca', icon: Sun, color: 'text-emerald-500', bg: 'bg-emerald-500' },
+                  { id: 'damp', label: 'Úmida', icon: Cloud, color: 'text-yellow-500', bg: 'bg-yellow-500' },
+                  { id: 'wet', label: 'Molhada', icon: CloudRain, color: 'text-blue-500', bg: 'bg-blue-500' },
+                  { id: 'closed', label: 'Fechada', icon: ShieldAlert, color: 'text-brand-red', bg: 'bg-brand-red' }
+                ].map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => handleUpdateTrackStatus(s.id as any)}
+                    className={`flex flex-col items-center gap-3 p-4 rounded-lg border transition-all ${
+                      trackStatus === s.id 
+                        ? `border-${s.id === 'dry' ? 'emerald' : s.id === 'damp' ? 'yellow' : s.id === 'wet' ? 'blue' : 'brand-red'}-500 bg-${s.id === 'dry' ? 'emerald' : s.id === 'damp' ? 'yellow' : s.id === 'wet' ? 'blue' : 'brand-red'}-500/10` 
+                        : 'border-white/5 hover:border-white/10 grayscale opacity-40'
+                    }`}
+                  >
+                    <s.icon className={`w-8 h-8 ${trackStatus === s.id ? s.color : 'text-white'}`} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="bg-[#121214] border border-brand-border rounded-xl p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold uppercase italic flex items-center gap-2">
