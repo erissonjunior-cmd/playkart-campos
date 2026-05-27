@@ -245,7 +245,7 @@ export default function AdminView({
                   <td className="p-4 text-right flex items-center justify-end gap-2">
                     <button 
                       onClick={() => {
-                        const message = `E aí ${b.pilotName}, beleza? Bora acelerar! 🏎️💨 Sua bateria na Playkart Campos tá confirmada para ${b.date} às ${b.time}. Já vai aquecendo os pneus que o grid tá pronto! 🏁🔥`;
+                        const message = `Olá ${b.pilotName}! Sua bateria na Playkart Campos está confirmada para ${b.date} às ${b.time}. Categoria: ${b.category}. Nos vemos na pista! 🏎️💨`;
                         window.open(`https://wa.me/55${b.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
                       }}
                       className="text-emerald-500 hover:bg-emerald-500 hover:text-white p-2 rounded transition-all"
