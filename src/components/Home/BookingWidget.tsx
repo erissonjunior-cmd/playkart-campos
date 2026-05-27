@@ -4,16 +4,12 @@ import { useApp } from '../../context/AppContext';
 import { generateDateOptions } from '../../utils/dateUtils';
 
 export default function BookingWidget() {
-  const { handleQuickBook } = useApp();
+  const { handleQuickBook, handleNavigate, isLoggedIn } = useApp();
   const [pilotName, setPilotName] = useState('');
   const [dateOptions] = useState(generateDateOptions());
   const [selectedDate, setSelectedDate] = useState(dateOptions[0]);
   const [pilotsCount, setPilotsCount] = useState<number>(2);
-  const [selectedCategory, setSelectedCategory] = useState('Sênior (125cc)');
-  const [countDown, setCountDown] = useState({ minutes: 12, seconds: 45 });
-
   const pilotsOptions = [1, 2, 3, 4, 5, 8, 10];
-  const categoryOptions = ['Sênior (125cc)', 'Cadete (60cc)', 'Super F4 (21hp)'];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -28,8 +24,10 @@ export default function BookingWidget() {
     return () => clearInterval(timer);
   }, []);
 
+  const [countDown, setCountDown] = useState({ minutes: 12, seconds: 45 });
+
   const handleBookSubmit = () => {
-    handleQuickBook(selectedDate, pilotsCount, selectedCategory, pilotName);
+    handleQuickBook(selectedDate, pilotsCount, 'Sênior (125cc)', pilotName);
   };
 
   const circuitData = JSON.parse(localStorage.getItem('kart_circuit_data') || '{}');
@@ -71,7 +69,7 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-2">
                   <label className="font-sans text-[11px] font-black text-white tracking-widest uppercase flex items-center gap-2">
                     <CalendarIcon className="w-3.5 h-3.5 text-brand-red" />
@@ -80,7 +78,7 @@ export default function BookingWidget() {
                   <select
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="bg-brand-surface-high text-brand-text p-4 border border-brand-border/60 hover:border-brand-red focus:border-brand-red focus:outline-none transition-all rounded-lg cursor-pointer font-sans text-sm font-semibold"
+                    className="bg-brand-surface-high text-brand-text p-4 border border-brand-border/60 hover:border-brand-red focus:border-brand-red focus:outline-none transition-all rounded-lg cursor-pointer font-sans text-sm font-semibold h-[52px]"
                   >
                     {dateOptions.map(day => (
                       <option key={day} value={day}>{day}</option>
@@ -96,26 +94,10 @@ export default function BookingWidget() {
                   <select
                     value={pilotsCount}
                     onChange={(e) => setPilotsCount(Number(e.target.value))}
-                    className="bg-brand-surface-high text-brand-text p-4 border border-brand-border/60 hover:border-brand-red focus:border-brand-red focus:outline-none transition-all rounded-lg cursor-pointer font-sans text-sm font-semibold"
+                    className="bg-brand-surface-high text-brand-text p-4 border border-brand-border/60 hover:border-brand-red focus:border-brand-red focus:outline-none transition-all rounded-lg cursor-pointer font-sans text-sm font-semibold h-[52px]"
                   >
                     {pilotsOptions.map(num => (
                       <option key={num} value={num}>{num} {num === 1 ? 'Piloto (Kart único)' : 'Pilotos'}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="font-sans text-[11px] font-black text-white tracking-widest uppercase flex items-center gap-2">
-                    <Gauge className="w-3.5 h-3.5 text-brand-red" />
-                    MOTORIZAÇÃO / CAT
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="bg-brand-surface-high text-brand-text p-4 border border-brand-border/60 hover:border-brand-red focus:border-brand-red focus:outline-none transition-all rounded-lg cursor-pointer font-sans text-sm font-semibold"
-                  >
-                    {categoryOptions.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
                 </div>

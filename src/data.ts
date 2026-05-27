@@ -79,7 +79,56 @@ export const INITIAL_TIME_SLOTS: TimeSlot[] = [
   }
 ];
 
-export const INITIAL_RANKINGS: RankingDriver[] = [];
+export const INITIAL_RANKINGS: RankingDriver[] = [
+  {
+    rank: 1,
+    name: 'Alex Ferreira',
+    nickname: 'ALEX_APEX',
+    avatar: 'https://files.catbox.moe/b4txuz.jpg',
+    bestLap: '42:194',
+    tagline: 'O segredo está em retardar a frenagem na curva 4.',
+    recordBeaten: true,
+    weightCategory: 'Até 70kg'
+  },
+  {
+    rank: 2,
+    name: 'Sarah Mendonça',
+    nickname: 'SARAH_SHIFT',
+    avatar: 'https://files.catbox.moe/l5ofx0.jpg',
+    bestLap: '42:250',
+    tagline: 'Constância é o que ganha campeonatos, não apenas uma volta rápida.',
+    recordBeaten: false,
+    weightCategory: '70kg-80kg'
+  },
+  {
+    rank: 3,
+    name: 'Bruno Silva',
+    nickname: 'BRUNO_DRIFT',
+    avatar: 'https://files.catbox.moe/t7ynoa.jpg',
+    bestLap: '42:310',
+    tagline: 'Mantenha o traçado limpo e o pé no fundo.',
+    recordBeaten: false,
+    weightCategory: '80kg-90kg'
+  },
+  {
+    rank: 4,
+    name: 'Carlos Tank',
+    nickname: 'T-REX_800',
+    avatar: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=carlos',
+    bestLap: '43:510',
+    tagline: 'Músculo e aceleração bruta.',
+    weightCategory: 'Acima 90kg'
+  },
+  {
+    rank: 5,
+    name: 'Julia Veloce',
+    nickname: 'LIGHTNING_JU',
+    avatar: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=julia',
+    bestLap: '42:205',
+    tagline: 'Leveza é minha maior vantagem.',
+    weightCategory: 'Até 70kg'
+  }
+];
 
 export const INITIAL_PILOT_PROFILE: PilotProfile = {
   name: '',

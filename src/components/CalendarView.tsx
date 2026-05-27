@@ -20,7 +20,8 @@ const paddockBanner = 'https://files.catbox.moe/56vtrc.jpg';
 
 export default function CalendarView() {
   const { 
-    slots, profile, quickSelections, handleConfirmBooking 
+    slots, profile, quickSelections, handleConfirmBooking,
+    isLoggedIn, handleNavigate
   } = useApp();
 
   const [dateOptions] = useState(() => {
@@ -54,6 +55,11 @@ export default function CalendarView() {
   }, [quickSelections, dateOptions]);
 
   const handleOpenBooking = (slot: TimeSlot) => {
+    if (!isLoggedIn) {
+      alert('Você precisa estar logado para reservar uma bateria. Acesse sua conta ou cadastre-se agora!');
+      handleNavigate('profile');
+      return;
+    }
     setActiveBookSlot(slot);
     setBookName(profile.name || 'Piloto Convidado');
     setBookKarts(Math.min(quickSelections?.pilots || 1, slot.availableKarts));
@@ -203,19 +209,11 @@ export default function CalendarView() {
                     <User className="w-4 h-4 text-brand-red absolute left-3.5 top-3.5" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="font-sans text-xs font-bold uppercase text-brand-text-muted">KARTS</label>
-                    <select value={bookKarts} onChange={(e) => setBookKarts(Number(e.target.value))} className="w-full bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-sm">
-                      {Array.from({ length: activeBookSlot.availableKarts }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n} {n === 1 ? 'Kart' : 'Karts'}</option>)}
-                    </select>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="font-sans text-xs font-bold uppercase text-brand-text-muted">CATEGORIA</label>
-                    <select value={bookCategory} onChange={(e) => setBookCategory(e.target.value)} className="w-full bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-sm">
-                      {['Sênior (125cc)', 'Cadete (60cc)', 'Super F4 (21hp)'].map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
+                <div className="flex flex-col gap-1">
+                  <label className="font-sans text-xs font-bold uppercase text-brand-text-muted">Nº DE KARTS (VAGAS)</label>
+                  <select value={bookKarts} onChange={(e) => setBookKarts(Number(e.target.value))} className="w-full bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-sm h-[48px]">
+                    {Array.from({ length: activeBookSlot.availableKarts }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n} {n === 1 ? 'Kart' : 'Karts'}</option>)}
+                  </select>
                 </div>
                 <button onClick={handleConfirmReservation} className="w-full bg-brand-red hover:bg-brand-red-hover text-white py-4 font-display text-2xl uppercase italic rounded transition-all cursor-pointer mt-4">CONFIRMAR GRID</button>
               </div>

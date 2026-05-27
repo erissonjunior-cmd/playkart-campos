@@ -10,9 +10,9 @@ import { RankingDriver } from '../types';
 import { useApp } from '../context/AppContext';
 
 export default function RankingView() {
-  const { rankings } = useApp();
+  const { rankings, isLoggedIn, handleNavigate } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | '125cc' | '60cc' | 'f4'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | '70kg' | '80kg' | '90kg' | 'heavy'>('all');
   const [selectedDriver, setSelectedDriver] = useState<RankingDriver | null>(null);
 
   const filteredRankings = rankings.filter(driver => {
@@ -20,13 +20,10 @@ export default function RankingView() {
                           driver.nickname.toLowerCase().includes(searchQuery.toLowerCase());
     
     if (selectedCategory === 'all') return matchesSearch;
-    if (selectedCategory === '125cc') {
-      return matchesSearch && (driver.rank === 1 || driver.rank === 2 || driver.rank === 4);
-    }
-    if (selectedCategory === '60cc') {
-      return matchesSearch && (driver.rank === 3 || driver.rank === 5);
-    }
-    return matchesSearch && (driver.rank === 6 || driver.rank === 7);
+    if (selectedCategory === '70kg') return matchesSearch && (driver.weightCategory === 'Até 70kg');
+    if (selectedCategory === '80kg') return matchesSearch && (driver.weightCategory === '70kg-80kg');
+    if (selectedCategory === '90kg') return matchesSearch && (driver.weightCategory === '80kg-90kg');
+    return matchesSearch && (driver.weightCategory === 'Acima 90kg');
   });
 
   return (
@@ -71,9 +68,14 @@ export default function RankingView() {
 
       <section className="mb-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex gap-2 w-full sm:w-auto overflow-x-auto hide-scrollbar">
-          {(['all', '125cc', '60cc', 'f4'] as const).map(cat => (
-            <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-2 font-display text-sm uppercase italic skew-tag transition-all cursor-pointer ${selectedCategory === cat ? 'bg-brand-red text-white' : 'bg-brand-surface border border-brand-border text-brand-text hover:bg-brand-surface-high'}`}>
-              <span>{cat === 'all' ? 'TODOS' : cat === '125cc' ? 'SÊNIOR (125cc)' : cat === '60cc' ? 'CADETE (60cc)' : 'SUPER F4 (21hp)'}</span>
+          {(['all', '70kg', '80kg', '90kg', 'heavy'] as const).map(cat => (
+            <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-2 font-display text-sm uppercase italic skew-tag transition-all cursor-pointer whitespace-nowrap ${selectedCategory === cat ? 'bg-brand-red text-white' : 'bg-brand-surface border border-brand-border text-brand-text hover:bg-brand-surface-high'}`}>
+              <span>
+                {cat === 'all' ? 'TODOS' : 
+                 cat === '70kg' ? 'ATÉ 70 KG' : 
+                 cat === '80kg' ? '70 KG - 80 KG' : 
+                 cat === '90kg' ? '80 KG - 90 KG' : 'ACIMA DE 90 KG'}
+              </span>
             </button>
           ))}
         </div>
@@ -91,7 +93,7 @@ export default function RankingView() {
               <tr className="border-b border-brand-border bg-black/40 text-brand-text-muted font-sans text-xs uppercase tracking-widest font-extrabold">
                 <th className="py-4 px-6 text-center w-20">POSIÇÃO</th>
                 <th className="py-4 px-6">PILOTO</th>
-                <th className="py-4 px-6">CATEGORIA BASE</th>
+                <th className="py-4 px-6">CATEGORIA DE PESO</th>
                 <th className="py-4 px-6 text-right">MELHOR VOLTA</th>
                 <th className="py-4 px-6 text-right w-48">PERFORMANCE / GAP</th>
               </tr>
@@ -121,7 +123,7 @@ export default function RankingView() {
                       </div>
                     </td>
                     <td className="py-5 px-6">
-                      <span className="font-sans text-xs text-brand-text font-medium">{driver.rank % 2 === 0 ? 'Sênior (125cc)' : 'Super F4 (21hp)'}</span>
+                      <span className="font-sans text-xs text-brand-text font-medium">{driver.weightCategory || 'N/A'}</span>
                     </td>
                     <td className="py-5 px-6 text-right">
                       <div className="flex flex-col items-end">
@@ -160,7 +162,21 @@ export default function RankingView() {
                 <div className="flex justify-between items-center text-xs text-brand-text-muted"><span>Velocidade Final</span><span className="font-mono text-white">88.4 km/h</span></div>
                 <div className="flex justify-between items-center text-xs text-brand-text-muted"><span>Conselho</span><span className="text-xs text-brand-text font-medium italic block text-right">"{selectedDriver.tagline}"</span></div>
               </div>
-              <button onClick={() => { alert(`Desafio enviado para ${selectedDriver.nickname}!`); setSelectedDriver(null); }} className="w-full bg-brand-red hover:bg-brand-red-hover text-white py-3 font-display text-xl uppercase italic rounded transition-all cursor-pointer">DESAFIAR PILOTO</button>
+              <button 
+                onClick={() => { 
+                  if (!isLoggedIn) {
+                    alert('Você precisa estar logado para desafiar outros pilotos!');
+                    handleNavigate('profile');
+                    setSelectedDriver(null);
+                    return;
+                  }
+                  alert(`Desafio enviado para ${selectedDriver.nickname}!`); 
+                  setSelectedDriver(null); 
+                }} 
+                className="w-full bg-brand-red hover:bg-brand-red-hover text-white py-3 font-display text-xl uppercase italic rounded transition-all cursor-pointer"
+              >
+                DESAFIAR PILOTO
+              </button>
             </div>
             <div className="absolute bottom-0 inset-x-0 h-1 carbon-texture bg-brand-red"></div>
           </div>

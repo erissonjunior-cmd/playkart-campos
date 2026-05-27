@@ -19,6 +19,7 @@ export default function ProfileView() {
   const [emailInput, setEmailInput] = useState(profile.email);
   const [catInput, setCatInput] = useState(profile.category);
   const [lvlInput, setLvlInput] = useState(profile.experienceLevel);
+  const [weightInput, setWeightInput] = useState(profile.weight?.toString() || '');
   
   const [activeTab, setActiveTab] = useState<'races' | 'edit'>('races');
 
@@ -30,7 +31,8 @@ export default function ProfileView() {
       nickname: nickInput.toUpperCase().replace(/\s+/g, '_'),
       email: emailInput,
       category: catInput,
-      experienceLevel: lvlInput
+      experienceLevel: lvlInput,
+      weight: weightInput ? parseInt(weightInput) : undefined
     });
     setIsEditing(false);
     setActiveTab('races');
@@ -58,6 +60,7 @@ export default function ProfileView() {
                    setEmailInput(profile.email);
                    setCatInput(profile.category);
                    setLvlInput(profile.experienceLevel);
+                   setWeightInput(profile.weight?.toString() || '');
                  }}><Edit3 className="w-3.5 h-3.5" /></div>
           </div>
           <div className="flex-grow">
@@ -66,7 +69,7 @@ export default function ProfileView() {
               <span className="font-mono text-xs text-brand-text-muted">{profile.email}</span>
             </div>
             <h2 className="font-display text-4xl italic text-white mt-2 leading-none">{profile.nickname}</h2>
-            <p className="font-sans text-xs text-brand-text-muted uppercase mt-1 tracking-wider">{profile.name} • {profile.category}</p>
+            <p className="font-sans text-xs text-brand-text-muted uppercase mt-1 tracking-wider">{profile.name} • {profile.category} {profile.weight ? `• ${profile.weight} KG` : ''}</p>
           </div>
           <div className="flex flex-wrap md:flex-nowrap gap-2 items-center">
             <button onClick={() => setActiveTab('races')} className={`px-5 py-2.5 font-display text-sm uppercase italic skew-tag transition-all cursor-pointer ${activeTab === 'races' ? 'bg-brand-red text-white' : 'bg-[#121214] border border-brand-border text-brand-text hover:bg-brand-surface-high'}`}><span>MINHAS CORRIDAS</span></button>
@@ -150,11 +153,15 @@ export default function ProfileView() {
                 </select>
               </div>
               <div className="flex flex-col gap-1">
-                <label className="font-sans text-xs font-bold text-brand-text-muted uppercase">NÍVEL</label>
-                <select value={lvlInput} onChange={(e) => setLvlInput(e.target.value as any)} className="bg-brand-surface-high text-brand-text p-3 border border-brand-border rounded text-sm cursor-pointer">
-                  {['Iniciante', 'Intermediário', 'Avançado', 'Profissional'].map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
+                <label className="font-sans text-xs font-bold text-brand-text-muted uppercase">PESO (KG)</label>
+                <input type="number" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} placeholder="Peso em KG" className="bg-brand-surface-high text-brand-text p-3 border border-brand-border rounded text-sm font-sans" />
               </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="font-sans text-xs font-bold text-brand-text-muted uppercase">NÍVEL</label>
+              <select value={lvlInput} onChange={(e) => setLvlInput(e.target.value as any)} className="bg-brand-surface-high text-brand-text p-3 border border-brand-border rounded text-sm cursor-pointer">
+                {['Iniciante', 'Intermediário', 'Avançado', 'Profissional'].map(l => <option key={l} value={l}>{l}</option>)}
+              </select>
             </div>
             <div className="flex gap-4 pt-4 border-t border-brand-border/40">
               <button type="button" onClick={() => setActiveTab('races')} className="flex-1 bg-transparent border border-brand-border text-brand-text py-3 rounded font-display text-xl uppercase italic cursor-pointer hover:bg-brand-surface-high transition-colors">CANCELAR</button>

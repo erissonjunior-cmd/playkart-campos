@@ -462,7 +462,7 @@ export default function AdminView({
         )}
       </AnimatePresence>
 
-      {/* Modern Pilot Details Modal */}
+      {/* Ultra-Professional Telemetry Pilot Modal */}
       <AnimatePresence>
         {selectedPilot && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -471,154 +471,170 @@ export default function AdminView({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedPilot(null)}
-              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+              className="absolute inset-0 bg-black/95 backdrop-blur-md"
             />
             
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="relative w-full max-w-2xl bg-[#0e0e10] border border-brand-border rounded-3xl shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden"
+              initial={{ opacity: 0, scale: 0.9, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 20 }}
+              className="relative w-full max-w-4xl bg-[#0a0a0c] border border-white/10 rounded-lg shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden flex flex-col md:flex-row h-full max-h-[85vh]"
             >
-              {/* Header with Background Pattern */}
-              <div className="relative h-32 bg-brand-red overflow-hidden">
-                <div className="absolute inset-0 opacity-20 carbon-texture" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <button 
-                  onClick={() => setSelectedPilot(null)}
-                  className="absolute top-6 right-6 p-2 bg-black/40 hover:bg-black/60 rounded-full transition-all text-white z-10"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Pilot Profile Info */}
-              <div className="px-8 pb-8">
-                <div className="relative -mt-16 mb-6 flex items-end gap-6">
-                  <div className="w-32 h-32 rounded-2xl bg-[#121214] border-4 border-[#0e0e10] overflow-hidden shadow-xl">
+              {/* Notched Corner Accents */}
+              <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-brand-red opacity-40 pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-brand-red opacity-40 pointer-events-none" />
+              
+              {/* Sidebar: Pilot Photo & Quick Identity */}
+              <div className="w-full md:w-72 bg-black border-r border-white/5 flex flex-col items-center p-8 relative overflow-hidden shrink-0">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-red to-transparent opacity-50" />
+                
+                <div className="relative group mb-6">
+                  <div className="w-48 h-48 bg-[#121214] rounded-sm p-1 border border-white/10 relative z-10 overflow-hidden">
+                    <div className="absolute inset-0 carbon-texture opacity-20" />
                     <img 
                       src={selectedPilot.avatar || "https://cdn-icons-png.flaticon.com/512/219/219983.png"} 
                       alt={selectedPilot.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover relative z-10 grayscale hover:grayscale-0 transition-all duration-500"
                     />
                   </div>
-                  <div className="pb-2">
-                    <h3 className="font-display text-4xl italic uppercase text-white tracking-tighter leading-none">
-                      {selectedPilot.name}
-                    </h3>
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className="text-brand-red font-black uppercase text-xs tracking-widest bg-brand-red/10 px-2 py-0.5 rounded border border-brand-red/20">
-                        {selectedPilot.nickname}
-                      </span>
-                      <span className="text-brand-text-muted font-bold text-[10px] uppercase tracking-[0.2em]">
-                        {selectedPilot.category} • {selectedPilot.experienceLevel}
-                      </span>
-                    </div>
+                  <div className="absolute -bottom-2 -right-2 bg-brand-red text-white py-1 px-3 font-display italic text-lg z-20 skew-tag border border-white/20">
+                    #{selectedPilot.rank || 'PRO'}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Left Column: Stats */}
-                  <div className="space-y-4 md:col-span-1">
-                    <div className="bg-brand-surface p-4 rounded-2xl border border-brand-border">
-                      <p className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest mb-3">Estatísticas de Pista</p>
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-end">
-                          <span className="text-xs text-gray-500 font-bold uppercase">Corridas</span>
-                          <span className="font-display text-3xl text-white italic">{selectedPilot.totalRaces}</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <span className="text-xs text-gray-500 font-bold uppercase">Melhor Volta</span>
-                          <span className="font-mono text-lg text-emerald-500 font-black">{selectedPilot.bestLap || '--:---'}</span>
-                        </div>
-                        <div className="flex justify-between items-end border-t border-white/5 pt-3">
-                          <span className="text-xs text-brand-red font-black uppercase italic">Streak Ativo</span>
-                          <span className="font-display text-2xl text-white">{selectedPilot.activeStreak}🔥</span>
-                        </div>
-                      </div>
-                    </div>
+                <div className="text-center space-y-2 relative z-10">
+                  <span className="text-[10px] font-black text-brand-red tracking-[0.3em] uppercase block">PILOTO COMPETIÇÃO</span>
+                  <h3 className="font-display text-2xl italic text-white leading-none uppercase">{selectedPilot.nickname}</h3>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{selectedPilot.experienceLevel}</p>
+                </div>
 
-                    <div className="bg-brand-red/5 p-4 rounded-2xl border border-brand-red/10">
-                      <p className="text-[10px] font-black text-brand-red uppercase tracking-widest mb-2">Dados Médicos</p>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-brand-red flex items-center justify-center text-white font-black text-lg">
-                          {selectedPilot.bloodType || '?'}
-                        </div>
-                        <span className="text-xs text-brand-text-muted font-bold uppercase tracking-tight">Tipo Sanguíneo para Emergências</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Contact & Bookings */}
-                  <div className="md:col-span-2 space-y-6">
-                    <div className="bg-brand-surface p-6 rounded-2xl border border-brand-border h-fit">
-                      <p className="text-[10px] font-black text-brand-text-muted uppercase tracking-widest mb-4">Informações de Contato & Documento</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-extrabold text-gray-600 uppercase">WhatsApp / Celular</label>
-                          <p className="text-emerald-500 font-mono font-bold text-sm flex items-center gap-2">
-                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                             {selectedPilot.whatsapp || selectedPilot.phone || 'Não informado'}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-extrabold text-gray-600 uppercase">E-mail</label>
-                          <p className="text-white text-sm font-semibold truncate">{selectedPilot.email}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-extrabold text-gray-600 uppercase">Documento ({selectedPilot.documentType || 'CPF'})</label>
-                          <p className="text-white font-mono text-sm">{selectedPilot.cpf || selectedPilot.documentNumber || 'Não informado'}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-extrabold text-gray-600 uppercase">Data de Nascimento</label>
-                          <p className="text-white text-sm font-semibold">
-                            {selectedPilot.dob ? new Date(selectedPilot.dob+'T00:00:00').toLocaleDateString('pt-BR') : 'Não informada'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-black/40 p-6 rounded-2xl border border-brand-border">
-                      <div className="flex justify-between items-center mb-4">
-                        <p className="text-[10px] font-black text-white uppercase tracking-widest">Estado de Reservas</p>
-                        {bookings.some(b => b.pilotName === selectedPilot.name) ? (
-                          <span className="text-[9px] font-black bg-brand-red text-white px-2 py-0.5 rounded italic animate-pulse">AGENDAMENTO ATIVO</span>
-                        ) : (
-                          <span className="text-[9px] font-black bg-gray-800 text-gray-400 px-2 py-0.5 rounded italic">SEM AGENDAMENTOS</span>
-                        )}
-                      </div>
-                      
-                      <div className="space-y-3">
-                        {bookings
-                          .filter(b => b.pilotName === selectedPilot.name)
-                          .map((b, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-brand-surface-high/50 rounded-xl border border-white/5">
-                              <div>
-                                <p className="text-white font-bold text-xs">{b.date} • {b.time}</p>
-                                <p className="text-[9px] text-brand-text-muted uppercase tracking-wider">{b.category} • {b.karts} Pilotos</p>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-[10px] text-brand-red font-black block">R$ {b.price.toFixed(2)}</span>
-                                <span className="text-[8px] text-emerald-500 font-bold uppercase">{b.status}</span>
-                              </div>
-                            </div>
-                          ))}
-                        {!bookings.some(b => b.pilotName === selectedPilot.name) && (
-                          <p className="text-xs text-gray-600 italic py-2">Nenhuma corrida pendente no sistema para este piloto.</p>
-                        )}
-                      </div>
-                    </div>
+                <div className="mt-auto pt-8 w-full">
+                  <div className="p-4 bg-brand-red/5 border border-brand-red/20 rounded-sm text-center">
+                    <span className="text-[9px] font-black text-brand-red uppercase tracking-widest block mb-1">LICENÇA PK_CAMPOS</span>
+                    <span className="font-mono text-white text-xs font-bold">2026-#{Math.floor(Math.random() * 9000) + 1000}</span>
                   </div>
                 </div>
               </div>
-              
-              <div className="p-6 bg-brand-surface border-t border-brand-border flex justify-end">
-                <button 
-                  onClick={() => setSelectedPilot(null)}
-                  className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all"
-                >
-                  Fechar Perfil
-                </button>
+
+              {/* Main Content: Telemetry & Data Grid */}
+              <div className="flex-grow p-8 overflow-y-auto custom-scrollbar bg-[#0d0d0f]">
+                <div className="flex justify-between items-start mb-8 border-b border-white/5 pb-6">
+                  <div>
+                    <h2 className="font-display text-4xl italic text-white uppercase tracking-tighter leading-none">{selectedPilot.name}</h2>
+                    <div className="flex items-center gap-4 mt-2">
+                       <span className="flex items-center gap-1.5 text-emerald-500 font-mono text-[10px] font-bold uppercase"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />SISTEMA OPERACIONAL</span>
+                       <span className="text-gray-600 text-[10px] font-black uppercase tracking-widest">• VERIFICADO</span>
+                    </div>
+                  </div>
+                  <button onClick={() => setSelectedPilot(null)} className="p-2 bg-white/5 hover:bg-brand-red transition-all cursor-pointer rounded-full border border-white/10 group">
+                    <X className="w-5 h-5 text-gray-400 group-hover:text-white" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Performance Data */}
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Timer className="w-3.5 h-3.5 text-brand-red" /> TELEMETRIA DE PISTA</span>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-[#121214] p-4 border-l-2 border-brand-red">
+                          <span className="text-[9px] text-gray-500 font-bold block mb-1 uppercase">Corridas Totais</span>
+                          <span className="font-display text-3xl text-white italic">{selectedPilot.totalRaces}</span>
+                        </div>
+                        <div className="bg-[#121214] p-4 border-l-2 border-emerald-500">
+                          <span className="text-[9px] text-gray-500 font-bold block mb-1 uppercase">Melhor Tempo</span>
+                          <span className="font-mono text-xl text-emerald-500 font-black">{selectedPilot.bestLap || '--:---'}</span>
+                        </div>
+                        <div className="bg-[#121214] p-4 border-l-2 border-orange-500">
+                          <span className="text-[9px] text-gray-500 font-bold block mb-1 uppercase">Active Streak</span>
+                          <span className="font-display text-2xl text-white">{selectedPilot.activeStreak}🔥</span>
+                        </div>
+                        <div className="bg-[#121214] p-4 border-l-2 border-blue-500">
+                          <span className="text-[9px] text-gray-500 font-bold block mb-1 uppercase">Classificação</span>
+                          <span className="text-blue-500 font-black text-sm uppercase">{selectedPilot.category}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-5 bg-black border border-white/5 relative overflow-hidden group">
+                      <div className="absolute inset-0 carbon-texture opacity-5 group-hover:opacity-10 transition-opacity" />
+                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4"><Info className="w-3.5 h-3.5 text-brand-red" /> FICHA CLÍNICA</span>
+                      <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-[#1a1a1c] border border-brand-red/30 flex flex-col items-center justify-center rounded-sm">
+                          <span className="text-[8px] text-brand-red font-black leading-none">TIPO</span>
+                          <span className="text-2xl text-white font-display italic">{selectedPilot.bloodType || '??'}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase leading-none">Peso Técnico</p>
+                          <p className="text-xl text-white font-mono font-black">{selectedPilot.weight ? `${selectedPilot.weight} KG` : 'N/A'}</p>
+                          <p className="text-[8px] text-brand-text-muted italic uppercase">EQUIPAMENTO NÃO INC.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Operational Data */}
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Users className="w-3.5 h-3.5 text-brand-red" /> PROTOCOLO DE CONTATO</span>
+                      <div className="bg-[#121214] p-5 space-y-4 border border-white/5">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-[9px] text-gray-500 font-bold uppercase">WhatsApp</span>
+                          <span className="text-xs text-emerald-500 font-mono font-bold tracking-tight">{selectedPilot.whatsapp || selectedPilot.phone || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-[9px] text-gray-500 font-bold uppercase">Canal Email</span>
+                          <span className="text-xs text-white font-medium truncate ml-4 hover:text-brand-red transition-colors">{selectedPilot.email}</span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-[9px] text-gray-500 font-bold uppercase">Documentação</span>
+                          <span className="text-xs text-white font-mono">{selectedPilot.cpf || selectedPilot.documentNumber || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-gray-500 font-bold uppercase">Data Nasc.</span>
+                          <span className="text-xs text-white font-bold">{selectedPilot.dob ? new Date(selectedPilot.dob+'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Calendar className="w-3.5 h-3.5 text-brand-red" /> GRID DE RESERVAS</span>
+                        <div className={`px-2 py-0.5 rounded text-[8px] font-black italic tracking-tighter ${bookings.some(b => b.pilotName === selectedPilot.name) ? 'bg-brand-red text-white' : 'bg-white/5 text-gray-500'}`}>
+                          {bookings.some(b => b.pilotName === selectedPilot.name) ? 'SINAL ATIVO' : 'STANDBY'}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+                        {bookings
+                          .filter(b => b.pilotName === selectedPilot.name)
+                          .map((b, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-black border-l-2 border-brand-red hover:bg-[#1a1a1c] transition-colors">
+                              <div>
+                                <p className="text-white font-bold text-[11px] leading-tight">{b.date} @ {b.time}</p>
+                                <p className="text-[8px] text-gray-500 uppercase font-black">{b.karts} KARTS • {b.category}</p>
+                              </div>
+                              <span className="text-[10px] text-brand-red font-display italic">GRID_{idx+1}</span>
+                            </div>
+                          ))}
+                        {!bookings.some(b => b.pilotName === selectedPilot.name) && (
+                          <div className="text-center py-6 border border-dashed border-white/10 rounded">
+                            <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Nenhuma corrida pendente</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-10 flex gap-4">
+                  <button onClick={() => setSelectedPilot(null)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-sm text-[10px] font-black uppercase tracking-[0.2em] transition-all">
+                    ENCERRAR MONITORAMENTO
+                  </button>
+                  <button className="flex-1 py-4 bg-brand-red/10 hover:bg-brand-red/20 text-brand-red border border-brand-red/30 rounded-sm text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2">
+                    <Edit className="w-3 h-3" /> ATUALIZAR STATUS
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>

@@ -28,6 +28,7 @@ export default function AuthView() {
   const [regDob, setRegDob] = useState<string>('');
   const [regDocType, setRegDocType] = useState<'CPF' | 'RG' | 'Passaporte' | 'Outro'>('CPF');
   const [regDocNum, setRegDocNum] = useState<string>('');
+  const [regWeight, setRegWeight] = useState<string>('');
   
   const [regError, setRegError] = useState<string | null>(null);
   const [regSuccess, setRegSuccess] = useState<boolean>(false);
@@ -68,7 +69,27 @@ export default function AuthView() {
     const nameParts = regName.trim().split(' ');
     const derivedNickname = `${nameParts[0] || 'PILOTO'}_${nameParts.length > 1 ? nameParts[nameParts.length - 1] : 'CAMPOS'}`.toUpperCase().replace(/[^A-Z0-9_]/g, '');
     const newPilot: PilotProfile = {
-      name: regName, nickname: derivedNickname, email: regEmail.trim(), category: 'Sênior (125cc)', experienceLevel: 'Iniciante', activeStreak: 1, totalRaces: 0, bestLap: '47:890', avatar: `https://picsum.photos/seed/pilot-${Date.now()}/200/200`, phone: regPhone, whatsapp: regPhone, documentType: regDocType, documentNumber: regDocNum, bloodType: undefined, cpf: '', rg: '', dob: regDob, weight: 75, password: regPassword, isRegistered: true, role: 'pilot'
+      name: regName, 
+      nickname: derivedNickname, 
+      email: regEmail.trim(), 
+      category: 'Sênior (125cc)', 
+      experienceLevel: 'Iniciante', 
+      activeStreak: 1, 
+      totalRaces: 0, 
+      bestLap: '47:890', 
+      avatar: `https://picsum.photos/seed/pilot-${Date.now()}/200/200`, 
+      phone: regPhone, 
+      whatsapp: regPhone, 
+      documentType: regDocType, 
+      documentNumber: regDocNum, 
+      bloodType: undefined, 
+      cpf: '', 
+      rg: '', 
+      dob: regDob, 
+      weight: regWeight ? parseInt(regWeight) : 75, 
+      password: regPassword, 
+      isRegistered: true, 
+      role: 'pilot'
     };
     handleRegisterPilot(newPilot);
     setRegSuccess(true);
@@ -130,23 +151,24 @@ export default function AuthView() {
               </div>
               <div className="grid grid-cols-2 gap-3.5">
                 <input type="text" value={regPhone} onChange={handlePhoneChange} placeholder="WHATSAPP" required className="bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-xs" />
-                <div className="relative">
-                  <input 
-                    type={showRegPassword ? "text" : "password"} 
-                    value={regPassword} 
-                    onChange={(e) => setRegPassword(e.target.value)} 
-                    placeholder="SENHA" 
-                    required 
-                    className="bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-xs w-full pr-9 focus:outline-none focus:border-brand-red transition-colors" 
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => setShowRegPassword(!showRegPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-text-muted hover:text-white transition-colors"
-                  >
-                    {showRegPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
+                <input type="number" value={regWeight} onChange={(e) => setRegWeight(e.target.value)} placeholder="PESO (KG)" className="bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-xs" />
+              </div>
+              <div className="relative">
+                <input 
+                  type={showRegPassword ? "text" : "password"} 
+                  value={regPassword} 
+                  onChange={(e) => setRegPassword(e.target.value)} 
+                  placeholder="SENHA" 
+                  required 
+                  className="bg-brand-surface text-brand-text p-3 border border-brand-border rounded text-xs w-full pr-9 focus:outline-none focus:border-brand-red transition-colors" 
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowRegPassword(!showRegPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-text-muted hover:text-white transition-colors"
+                >
+                  {showRegPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
               </div>
               <button type="submit" className="w-full bg-brand-red hover:bg-[#ff1e27] text-white font-display text-sm italic font-black uppercase py-4 rounded-sm flex items-center justify-center gap-2 cursor-pointer transition-all shadow-[0_4px_15px_rgba(227,6,19,0.2)] mt-2"><span>INICIAR CARREIRA</span><UserPlus className="w-4 h-4" /></button>
             </form>

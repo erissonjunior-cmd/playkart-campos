@@ -55,6 +55,7 @@ export interface RankingDriver {
   recordBeaten?: boolean;
   avatar: string;
   tagline: string;
+  weightCategory?: string;
 }
 
 export interface CircuitCurve {
