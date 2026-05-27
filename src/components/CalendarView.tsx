@@ -56,7 +56,6 @@ export default function CalendarView() {
 
   const handleOpenBooking = (slot: TimeSlot) => {
     if (!isLoggedIn) {
-      alert('Você precisa estar logado para reservar uma bateria. Acesse sua conta ou cadastre-se agora!');
       handleNavigate('profile');
       return;
     }
@@ -69,7 +68,6 @@ export default function CalendarView() {
   const handleConfirmReservation = () => {
     if (!activeBookSlot) return;
     if (!bookName) {
-      alert('Por favor, preencha o Nome do piloto principal.');
       return;
     }
     const calculatedPrice = activeBookSlot.price * bookKarts * (hasPromoApplied ? 0.8 : 1);
@@ -179,7 +177,7 @@ export default function CalendarView() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/75 to-transparent flex flex-col justify-center px-8 z-10">
           <span className="text-brand-red font-display uppercase tracking-widest text-sm mb-1.5 flex items-center gap-1"><Zap className="w-4 h-4" />Oferta Especial</span>
           <h3 className="text-3xl md:text-4xl font-display italic uppercase text-white leading-none mb-4">MASTER THE TRACK<br />SALVE <span className="text-brand-red">20% OFF</span> EM GRUPOS</h3>
-          <button onClick={() => alert('Cupom ATIVADO!')} className="skew-chip bg-white text-black font-sans font-extrabold text-xs uppercase px-5 py-2 hover:bg-brand-red hover:text-white transition-all cursor-pointer w-fit"><span>ATIVAR GRUPO</span></button>
+          <button onClick={() => {}} className="skew-chip bg-white text-black font-sans font-extrabold text-xs uppercase px-5 py-2 hover:bg-brand-red hover:text-white transition-all cursor-pointer w-fit"><span>ATIVAR GRUPO</span></button>
         </div>
       </section>
 

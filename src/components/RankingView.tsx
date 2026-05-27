@@ -165,12 +165,10 @@ export default function RankingView() {
               <button 
                 onClick={() => { 
                   if (!isLoggedIn) {
-                    alert('Você precisa estar logado para desafiar outros pilotos!');
                     handleNavigate('profile');
                     setSelectedDriver(null);
                     return;
                   }
-                  alert(`Desafio enviado para ${selectedDriver.nickname}!`); 
                   setSelectedDriver(null); 
                 }} 
                 className="w-full bg-brand-red hover:bg-brand-red-hover text-white py-3 font-display text-xl uppercase italic rounded transition-all cursor-pointer"
