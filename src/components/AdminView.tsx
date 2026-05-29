@@ -51,10 +51,10 @@ export default function AdminView({
   onCancelBooking,
   onUpdateSlot
 }: AdminViewProps) {
-  const { trackStatus, handleUpdateTrackStatus } = useApp();
+  const { trackStatus, handleUpdateTrackStatus, isAutoStatus, setIsAutoStatus } = useApp();
   const [activeTab, setActiveTab] = useState<'pilots' | 'bookings' | 'slots' | 'circuit'>('pilots');
   
-  // Circuit State (Nano Banana)
+  // Circuit State (Manual Upload)
   const [circuitData, setCircuitData] = useState<CircuitData>({
     circuitPath: '',
     blueprintImage: '',
@@ -62,7 +62,8 @@ export default function AdminView({
     suggestion: ''
   });
   const [blueprintImage, setBlueprintImage] = useState<string | null>(null);
-  
+  const [isSaving, setIsSaving] = useState(false);
+
   // Slot Editing State
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
   const [editForm, setEditForm] = useState<TimeSlot | null>(null);
@@ -111,14 +112,20 @@ export default function AdminView({
   };
 
   const handleSaveBlueprint = () => {
-    const updatedCircuit = {
-      ...circuitData,
-      blueprintImage: blueprintImage || '',
-      circuitPath: ''
-    };
-    localStorage.setItem('kart_circuit_data', JSON.stringify(updatedCircuit));
-    setCircuitData(updatedCircuit);
-    alert('Planta do circuito salva com sucesso!');
+    setIsSaving(true);
+    
+    // Simula delay de persistência para feedback visual
+    setTimeout(() => {
+      const updatedCircuit = {
+        ...circuitData,
+        blueprintImage: blueprintImage || '',
+        circuitPath: ''
+      };
+      localStorage.setItem('kart_circuit_data', JSON.stringify(updatedCircuit));
+      setCircuitData(updatedCircuit);
+      setIsSaving(false);
+      // O feedback visual já acontece no botão através do estado isSaving
+    }, 800);
   };
 
   return (
@@ -128,8 +135,53 @@ export default function AdminView({
           PAINEL DE ADMINISTRAÇÃO
         </h2>
         <p className="font-sans text-brand-text-muted mt-2 uppercase tracking-widest text-[10px] font-bold">
-          Gestão de Pilotos, Reservas e Pista Técnica
+          Gestão de Pilotos, Reservas e Baterias
         </p>
+      </div>
+
+      <div className="bg-[#121214] border border-brand-border rounded-xl p-6 shadow-2xl mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h3 className="text-sm font-black uppercase italic flex items-center gap-2 text-brand-text-muted tracking-widest">
+            <Sun className="w-4 h-4 text-yellow-500" />
+            Status Operacional da Pista
+          </h3>
+          
+          <div className="flex items-center gap-3 bg-black/40 p-2 rounded-lg border border-white/5">
+            <span className={`text-[9px] font-black uppercase tracking-widest ${isAutoStatus ? 'text-emerald-500' : 'text-gray-500'}`}>
+              Radar Meteorológico {isAutoStatus ? '(ON)' : '(OFF)'}
+            </span>
+            <button 
+              onClick={() => setIsAutoStatus(!isAutoStatus)}
+              className={`relative w-10 h-5 rounded-full transition-colors flex items-center px-1 ${isAutoStatus ? 'bg-emerald-500' : 'bg-gray-700'}`}
+            >
+              <motion.div 
+                animate={{ x: isAutoStatus ? 20 : 0 }}
+                className="w-3 h-3 bg-white rounded-full shadow-lg" 
+              />
+            </button>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { id: 'dry', label: 'Seca', icon: Sun, color: 'text-emerald-500', bg: 'bg-emerald-500' },
+            { id: 'damp', label: 'Úmida', icon: Cloud, color: 'text-yellow-500', bg: 'bg-yellow-500' },
+            { id: 'wet', label: 'Molhada', icon: CloudRain, color: 'text-blue-500', bg: 'bg-blue-500' },
+            { id: 'closed', label: 'Fechada', icon: ShieldAlert, color: 'text-brand-red', bg: 'bg-brand-red' }
+          ].map((s) => (
+            <button
+              key={s.id}
+              onClick={() => handleUpdateTrackStatus(s.id as any)}
+              className={`flex items-center justify-center gap-3 p-3 rounded-lg border transition-all ${
+                trackStatus === s.id 
+                  ? `border-${s.id === 'dry' ? 'emerald' : s.id === 'damp' ? 'yellow' : s.id === 'wet' ? 'blue' : 'brand-red'}-500 bg-${s.id === 'dry' ? 'emerald' : s.id === 'damp' ? 'yellow' : s.id === 'wet' ? 'blue' : 'brand-red'}-500/10` 
+                  : 'border-white/5 hover:border-white/10 grayscale opacity-40'
+              }`}
+            >
+              <s.icon className={`w-5 h-5 ${trackStatus === s.id ? s.color : 'text-white'}`} />
+              <span className="text-[10px] font-black uppercase tracking-widest">{s.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex border-b border-brand-border mb-8 overflow-x-auto custom-scrollbar">
@@ -167,7 +219,7 @@ export default function AdminView({
           }`}
         >
           <Map className="w-4 h-4" />
-          Mapa  
+          Traçado
         </button>
       </div>
 
@@ -288,45 +340,36 @@ export default function AdminView({
       )}
 
       {activeTab === 'circuit' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#121214] border border-brand-border rounded-xl p-6 shadow-2xl mb-8">
-              <h3 className="text-xl font-bold uppercase italic flex items-center gap-2 mb-6">
-                <Sun className="w-5 h-5 text-yellow-500" />
-                Status da Pista (Real-Time)
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                  { id: 'dry', label: 'Seca', icon: Sun, color: 'text-emerald-500', bg: 'bg-emerald-500' },
-                  { id: 'damp', label: 'Úmida', icon: Cloud, color: 'text-yellow-500', bg: 'bg-yellow-500' },
-                  { id: 'wet', label: 'Molhada', icon: CloudRain, color: 'text-blue-500', bg: 'bg-blue-500' },
-                  { id: 'closed', label: 'Fechada', icon: ShieldAlert, color: 'text-brand-red', bg: 'bg-brand-red' }
-                ].map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => handleUpdateTrackStatus(s.id as any)}
-                    className={`flex flex-col items-center gap-3 p-4 rounded-lg border transition-all ${
-                      trackStatus === s.id 
-                        ? `border-${s.id === 'dry' ? 'emerald' : s.id === 'damp' ? 'yellow' : s.id === 'wet' ? 'blue' : 'brand-red'}-500 bg-${s.id === 'dry' ? 'emerald' : s.id === 'damp' ? 'yellow' : s.id === 'wet' ? 'blue' : 'brand-red'}-500/10` 
-                        : 'border-white/5 hover:border-white/10 grayscale opacity-40'
-                    }`}
-                  >
-                    <s.icon className={`w-8 h-8 ${trackStatus === s.id ? s.color : 'text-white'}`} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{s.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-[#121214] border border-brand-border rounded-xl p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold uppercase italic flex items-center gap-2">
                   <Layout className="w-5 h-5 text-brand-red" />
                   Planta da Pista
                 </h3>
-                <button onClick={handleSaveBlueprint} className="px-4 py-2 bg-brand-red rounded text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                  <Save className="w-4 h-4" /> Salvar Planta
-                </button>
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isSaving}
+                  onClick={handleSaveBlueprint} 
+                  className={`px-6 py-2 rounded text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all shadow-lg ${
+                    isSaving 
+                      ? 'bg-emerald-500 text-white cursor-wait' 
+                      : 'bg-brand-red hover:bg-[#ff1e27] text-white active:shadow-inner'
+                  }`}
+                >
+                  {isSaving ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Sincronizando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" /> Salvar Traçado
+                    </>
+                  )}
+                </motion.button>
               </div>
               
               <div className="relative aspect-video rounded-lg bg-black border-2 border-dashed border-white/10 overflow-hidden">
@@ -342,42 +385,33 @@ export default function AdminView({
                 ) : (
                   <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5">
                     <Upload className="w-8 h-8 text-brand-red mb-3" />
-                    <span className="font-black text-[10px] tracking-widest uppercase">Subir Planta Técnica</span>
+                    <span className="font-black text-[10px] tracking-widest uppercase">Subir Foto do Traçado</span>
                     <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                   </label>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
               <div className="bg-[#121214] p-5 rounded-xl border border-white/5">
-                <h4 className="text-[10px] font-black uppercase text-brand-red mb-3 tracking-widest">Análise do Arquiteto</h4>
+                <h4 className="text-[10px] font-black uppercase text-brand-red mb-3 tracking-widest">Análise do Consultor</h4>
                 <textarea 
                   value={circuitData.description}
                   onChange={(e) => setCircuitData({...circuitData, description: e.target.value})}
-                  className="w-full bg-black/40 border border-white/10 rounded p-3 text-sm text-gray-400 h-32 outline-none focus:border-brand-red transition-all"
-                  placeholder="Ex: Pista técnica com zebras baixas..."
+                  className="w-full bg-black/40 border border-white/10 rounded p-3 text-sm text-gray-400 h-24 outline-none focus:border-brand-red transition-all"
+                  placeholder="Ex: Pista técnica com alta exigência de pneus..."
                 />
               </div>
               <div className="bg-[#121214] p-5 rounded-xl border border-white/5">
-                <h4 className="text-[10px] font-black uppercase text-emerald-500 mb-3 tracking-widest">Dica Pro</h4>
+                <h4 className="text-[10px] font-black uppercase text-emerald-500 mb-3 tracking-widest">Dica Estratégica</h4>
                 <textarea 
                   value={circuitData.suggestion}
                   onChange={(e) => setCircuitData({...circuitData, suggestion: e.target.value})}
-                  className="w-full bg-black/40 border border-white/10 rounded p-3 text-sm text-gray-400 h-32 outline-none focus:border-emerald-500 transition-all"
-                  placeholder="Ex: Mantenha o traçado aberto na curva 4..."
+                  className="w-full bg-black/40 border border-white/10 rounded p-3 text-sm text-gray-400 h-24 outline-none focus:border-emerald-500 transition-all"
+                  placeholder="Dica para os pilotos..."
                 />
               </div>
             </div>
-          </div>
-
-          <div className="bg-brand-red/5 border border-brand-red/10 p-6 rounded-xl h-fit">
-            <h3 className="font-black italic uppercase text-brand-red mb-4">Instruções</h3>
-            <ul className="text-xs text-gray-500 space-y-4 font-sans leading-relaxed">
-              <li>1. Gere a planta no <strong className="text-white">Gemini Web</strong> usando a foto aérea.</li>
-              <li>2. Faça o upload da imagem limpa que o Gemini retornar.</li>
-              <li>3. Salve para atualizar a Home do site instantaneamente.</li>
-            </ul>
           </div>
         </div>
       )}

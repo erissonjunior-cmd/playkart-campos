@@ -13,6 +13,7 @@ export default function HomeView() {
       <HeroSection />
       <BookingWidget />
       <HallOfFame />
+      <CircuitSection />
       <GallerySection />
       <LocationSection />
       <CTASection />

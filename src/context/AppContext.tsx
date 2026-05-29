@@ -35,6 +35,8 @@ interface AppContextType {
   circuitPath: string;
   setCircuitPath: (path: string) => void;
   trackStatus: TrackStatus;
+  isAutoStatus: boolean;
+  setIsAutoStatus: (auto: boolean) => void;
   handleUpdateTrackStatus: (status: TrackStatus) => void;
   
   // Actions
@@ -78,6 +80,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [trackStatus, setTrackStatus] = useState<TrackStatus>(() => 
     loadFromLocalStorage<TrackStatus>('pk_campos_track_status', 'dry')
   );
+  const [isAutoStatus, setIsAutoStatus] = useState<boolean>(() => 
+    loadFromLocalStorage<boolean>('pk_campos_is_auto_status', true)
+  );
+  const [lastWeatherFetch, setLastWeatherFetch] = useState<number>(0);
 
   // Kart grid positions (static test data for now)
   const kartPositions = [
@@ -178,6 +184,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToLocalStorage('pk_campos_circuit_map_image', circuitMapImage); }, [circuitMapImage]);
   useEffect(() => { saveToLocalStorage('pk_campos_circuit_path', circuitPath); }, [circuitPath]);
   useEffect(() => { saveToLocalStorage('pk_campos_track_status', trackStatus); }, [trackStatus]);
+  useEffect(() => { saveToLocalStorage('pk_campos_is_auto_status', isAutoStatus); }, [isAutoStatus]);
 
   // Ensure master admin is always sync'd in local storage list if missing
   useEffect(() => {
@@ -240,7 +247,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleUpdateTrackStatus = (status: TrackStatus) => {
     setTrackStatus(status);
+    setIsAutoStatus(false); // Assume controle manual ao trocar manualmente
   };
+
+  // Weather Sync Logic (Campos dos Goytacazes: -21.7642, -41.3236)
+  useEffect(() => {
+    if (!isAutoStatus) return;
+
+    const fetchWeather = async () => {
+      try {
+        console.log("Sincronizando clima de Campos (Open-Meteo)...");
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-21.7642&longitude=-41.3236&current=weather_code,precipitation&timezone=auto');
+        const data = await res.json();
+        
+        const prec = data.current.precipitation;
+        const code = data.current.weather_code;
+        
+        // 0: Clear, 1-3: Partly Cloudy, 45-48: Fog
+        // 51-67: Drizzle/Rain, 71-77: Snow, 80-82: Rain Showers, 95-99: Thunderstorm
+        
+        let newStatus: TrackStatus = 'dry';
+        if (prec > 1.0 || code >= 61) {
+          newStatus = 'wet';
+        } else if (prec > 0.1 || (code >= 51 && code <= 55)) {
+          newStatus = 'damp';
+        }
+
+        if (newStatus !== trackStatus) {
+          setTrackStatus(newStatus);
+        }
+        setLastWeatherFetch(Date.now());
+      } catch (err) {
+        console.error("Erro ao sincronizar clima:", err);
+      }
+    };
+
+    fetchWeather();
+    const interval = setInterval(fetchWeather, 300000); // A cada 5 minutos
+    return () => clearInterval(interval);
+  }, [isAutoStatus, trackStatus]);
 
   // Actions
   const handleNavigate = (tab: ActiveTab) => {
@@ -316,7 +361,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       rankings, setRankings, quickSelections, setQuickSelections,
       handleNavigate, handleQuickBook, handleConfirmBooking, handleCancelBooking,
       handleUpdateSlot, handleUpdateProfile, handleLoginSuccess, handleRegisterPilot, handleLogout,
-      circuitCurves, setCircuitCurves, circuitMapImage, setCircuitMapImage, circuitPath, setCircuitPath
+      circuitCurves, setCircuitCurves, circuitMapImage, setCircuitMapImage, circuitPath, setCircuitPath,
+      trackStatus, handleUpdateTrackStatus, isAutoStatus, setIsAutoStatus
     }}>
       {children}
     </AppContext.Provider>

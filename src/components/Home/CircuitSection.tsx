@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Instagram, Facebook } from 'lucide-react';
+import { Phone } from 'lucide-react';
 
 interface CircuitData {
   circuitPath: string;
@@ -80,18 +80,18 @@ const CircuitSection: React.FC = () => {
             <div className="bg-[#121214] border-l-4 border-brand-red p-8 rounded-r-xl">
               <h3 className="text-brand-red font-bold uppercase tracking-widest mb-4">Análise Técnica</h3>
               <p className="text-gray-400 leading-relaxed text-lg italic">
-                "{circuitData.description}"
+                "{circuitData.description || 'Nenhuma descrição técnica disponível.'}"
               </p>
             </div>
 
             <div className="bg-[#121214] border-l-4 border-emerald-500 p-8 rounded-r-xl">
               <h3 className="text-emerald-500 font-bold uppercase tracking-widest mb-4">Dica Pro</h3>
               <p className="text-gray-400 leading-relaxed text-lg">
-                {circuitData.suggestion}
+                {circuitData.suggestion || 'Não há dicas de performance registradas.'}
               </p>
             </div>
 
-            <button className="w-full py-5 bg-brand-red text-white font-bold rounded-xl flex items-center justify-center gap-3 transition-all hover:bg-red-700 hover:-translate-y-1 active:scale-95 text-lg uppercase tracking-wider">
+            <button onClick={() => document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' })} className="w-full py-5 bg-brand-red text-white font-bold rounded-xl flex items-center justify-center gap-3 transition-all hover:bg-red-700 hover:-translate-y-1 active:scale-95 text-lg uppercase tracking-wider">
               <span>Agendar Minha Bateria</span>
               <Phone className="w-5 h-5 fill-white" />
             </button>
